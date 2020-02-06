@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ja">
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta charset="UTF-8" />
+		<title>音声認識テロップ - SKA’s Web</title>
+		<link rel="shortcut icon" type="image/vnd.microsoft.icon" href="../icon.ico"  />
+		<link rel="stylesheet" type="text/css" href="./recognition-video-style.css" />
+		<script type="text/javascript" src="./recognition-script.js"></script>
+	</head>
+	<body>
+		<div id="all">
+			<p>
+				<button id="button-ja" onclick="changeLanguage('ja-JP')">日本語</button>　
+				<button id="button-en" onclick="changeLanguage('en-US')">英語</button>　
+				<button id="button-start" onclick="recognitionStart()">認識開始</button>　
+				<button id="button-stop" onclick="recognitionStop()">認識終了</button>
+			</p>
+			<div class="subtitle-box">
+				<p id="subtitle">
+					言語を選択してから認識開始ボタンを押してください<br />
+					このようにテロップを表示します<br />
+					デフォルトでは3行分表示されます
+				</p>
+			</div>
+		</div>
+	</body>
+</html>
