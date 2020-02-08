@@ -1,0 +1,263 @@
+*
+{
+	color: #ffffff;
+	font-style: normal;
+	font-variant: normal;
+	line-height: 1.8;
+	font-family: "ヒラギノ角ゴ ProN", "Hiragino Kaku Gothic ProN", "游ゴシック", "YuGothic", "HGPｺﾞｼｯｸM", "HGPGothicM", sans-serif;
+	font-weight: 500;
+}
+
+body
+{
+	background-color: #373737;
+	margin-top: 50px;
+	margin-bottom: 50px;
+	margin-left: 20px;
+	margin-right: 20px;
+	text-align: center;
+	font-size: medium;
+}
+
+#all
+{
+	margin-left: auto;
+	margin-right: auto;
+	text-align: left;
+	max-width: 1024px;
+}
+
+a:link
+{
+	color: #00ffff;
+}
+
+a:visited
+{
+	color: #ff6688;
+}
+
+h1
+{
+	font-size: 200%;
+	font-family: "ヒラギノ角ゴ ProN", "Hiragino Kaku Gothic ProN", "游ゴシック", "YuGothic", "HGPｺﾞｼｯｸE", sans-serif;
+	font-weight: 700;
+	text-align: center;
+	color: #00ff00;
+}
+
+h2
+{
+	font-size: 150%;
+	font-family: "ヒラギノ角ゴ ProN", "Hiragino Kaku Gothic ProN", "游ゴシック", "YuGothic", "HGPｺﾞｼｯｸE", sans-serif;
+	font-weight: 700;
+	color: #cfa0ff;;
+}
+
+h3
+{
+	font-size: 125%;
+	font-family: "ヒラギノ角ゴ ProN", "Hiragino Kaku Gothic ProN", "游ゴシック", "YuGothic", "HGPｺﾞｼｯｸE", sans-serif;
+	font-weight: 700;
+	color: #ffff00;
+}
+
+p.aa
+{
+	font-family: "ヒラギノ角ゴ ProN", "HiraKakuProN", "游ゴシック Medium", "YuGothic Medium", sans-serif;
+	color: #f0a6bd;
+	line-height: 1.0;
+}
+
+.right
+{
+	text-align: right;
+}
+
+.yellow
+{
+	font-size: 150%;
+	color: #ffff00;
+}
+
+.small-yellow
+{
+	font-size: 100%;
+	color: #ffff00;
+}
+
+strong.cyan
+{
+	font-size: 150%;
+	color: #00ffff;
+}
+
+strong
+{
+	font-size: 150%;
+}
+
+strong.bold
+{
+	font-size: 100%;
+	font-family: "ヒラギノ角ゴ ProN", "Hiragino Kaku Gothic ProN", "HiraKakuProN", "游ゴシック", "YuGothic", "HGPｺﾞｼｯｸE", sans-serif;
+	font-weight: 700;
+}
+
+hr.redbar
+{
+	background-color: #ff0000;
+	color: #ff0000;
+	height: 3px;
+	border: none;
+}
+
+ifream
+{
+	width: 640px;
+	height: 360px;
+	max-width: 854px;
+	border: 2px;
+	text-align: bottom;
+}
+
+img.standard-img
+{
+	height: 360px;
+	border: 0px;
+	text-align: bottom;
+}
+
+img.small-img
+{
+	height: 180px;
+	border: 0px;
+	text-align: center;
+}
+
+img.thumbnail
+{
+	height: 45px;
+	border: 0px;
+	text-align: bottom;
+}
+
+td.table_number
+{
+	text-align: right;
+}
+
+button, select
+{
+	background-color: #606060;
+	color: #ffffff;
+}
+
+#video
+{
+	margin-left: auto;
+	margin-right: auto;
+	text-align: center;
+	max-width: 854px;
+	color: #000000;
+	font-family: "ヒラギノ 角ゴProN", "HiraKakuProN", "游ゴシック Medium", "YuGothic Medium", sans-serif;
+}
+
+.center
+{
+	text-align: center;
+}
+
+input
+{
+	background-color: #606060;
+	color: #ffffff;
+}
+
+textarea
+{
+	background-color: #606060;
+	color: #ffffff;
+	border: none;
+}
+
+textarea.ta
+{
+	width: 100%;
+	height: 100%;
+	min-height: 50vh;
+}
+
+table, td, th, tr
+{
+	border: 1px;
+	border-style: solid;
+	border-collapse: collapse;
+	border-color: #ffffff;
+	padding: 10pt;
+	min-width: 60pt;
+	color: #ffffff;
+}
+
+table
+{
+	width: 100%;
+	max-width: 100%;
+}
+
+th
+{
+	background-color: #000053;
+	color: #ffffff;
+}
+
+table.no-border, tr.no-border, th.no-border, td.no-border
+{
+	border: none;
+}
+
+th, label.header
+{
+	text-align: center;
+	font-family: "ヒラギノ角ゴ ProN W6", "HiraKakuProN", "游ゴシック", "YuGothic", "HGPｺﾞｼｯｸE", sans-serif;
+	font-weight: 600;
+	font-size: 115%;
+}
+
+td.button
+{
+	text-align: center;
+	padding-top: 0pt !important;
+	padding-left: 0pt !important;
+	padding-bottom: 0pt !important;
+	padding-right: 0pt !important;
+}
+
+label
+{
+	color: #ffffff;
+}
+
+td label
+{
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+.tr_yellow
+{
+	background-color: #ffff00;
+	text-align: center;
+}
+
+tr.tr_green
+{
+	background-color: #c0ffc0;
+}
+
+tr.tr_blue
+{
+	background-color: #00ffff;
+	color: #000000;
+}

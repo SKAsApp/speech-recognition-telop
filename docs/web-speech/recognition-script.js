@@ -1,10 +1,12 @@
 // 初期処理
 let agent = window.navigator.userAgent;
 let subtitle;
-let language = "";
+let languageSelector;
+let language = "ja-JP";
 let speaking = false;
 let stopButtonPushed = false;
 let recognition = null;
+let confidenceMode = false;
 window.SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
 if(!"SpeechRecognition" in window)
 {
@@ -14,10 +16,16 @@ else if(!((agent.indexOf("Chrome") != -1) && (agent.indexOf("Edge") == -1) && (a
 {
 	window.alert("ご利用のブラウザーは音声認識に部分的にしか対応していません。\r\n制限なく利用するためには Google Chrome をお使いください。");
 }
+window.onunload = function( ){ };
 // HTMLが読み込まれたら出力先の要素を取得する
 document.addEventListener("DOMContentLoaded", ( ) => 
 {
 	subtitle = document.getElementById("subtitle");
+	languageSelector = document.getElementById("language");
+	languageSelector.addEventListener("change", (event) => 
+	{
+		changeLanguage( );
+	});
 });
 
 
@@ -47,35 +55,30 @@ function setEventHandler( )
 		//render("エラーが発生しました", true);
 		if(!speaking)
 		{
-			speechRecognition( );
+			recognitionStart( );
 			return;
 		}
+		recognitionStop( );
 		recognition = null;
-	}
+	};
 
 	// 終わったら
-	recognition.onsoundend = (event) => 
+	recognition.onend = (event) => 
 	{
 		//render("停止しました", true);
 		if(!stopButtonPushed)
 		{
-			speechRecognition( );
+			recognitionStart( );
 			return;
 		}
-		stopButtonPushed = false;
-	}
+		recognitionStop( );
+	};
 
 	// 認識できなかったら
 	recognition.onnomatch = (event) => 
 	{
 		//render("認識できませんでした　もう1度お話ください", true);
-	}
-
-	// 認識開始
-	recognition.onsoundstart = (event) =>
-	{
-		//render("開始しました", true);
-	}
+	};
 
 	// 認識したら
 	recognition.onresult = (event) => 
@@ -84,8 +87,13 @@ function setEventHandler( )
 		for(let i = event.resultIndex; i < event.results.length; i += 1)
 		{
 			let transcript = event.results[i][0].transcript;
-			let confidence = event.results[i][0].confidence.toString( );
-			let response = transcript + '<span class="confidence"> （' + confidence.substr(0, 5) + '）</span>';
+			let response = transcript;
+			if(confidenceMode)
+			{
+				let confidence = event.results[i][0].confidence.toString( );
+				response = transcript + '<span class="confidence"> （' + confidence.substr(0, 5) + '）</span>';
+			}
+			// 表示欄に入りきらなくなったら再起動
 			if(response.length > 111)
 			{
 				restart( );
@@ -98,7 +106,7 @@ function setEventHandler( )
 			}
 			speaking = true;
 		}
-	}
+	};
 }
 
 // 描画
@@ -118,23 +126,30 @@ function renderSubtitle(string)
 	subtitle.insertAdjacentHTML("afterbegin", string);
 }
 
-// 言語ボタン押したら
-function changeLanguage(lang)
+// 言語選択変わったら
+function changeLanguage( )
 {
-	language = lang;
+	language = languageSelector.value;
 }
 
-// マイクオンボタン押したら
+// 開始ボタン押したら
 function recognitionStart( )
 {
+	stopButtonPushed = false;
 	speechRecognition( );
 }
 
-// マイクオフボタン押したら
+// 終了ボタン押したら
 function recognitionStop( )
 {
 	stopButtonPushed = true;
 	recognition.stop( );
+}
+
+// 信頼度表示変更
+function setConfidenceMode(mode)
+{
+	confidenceMode = mode;
 }
 
 function restart( )
