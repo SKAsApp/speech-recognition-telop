@@ -62,8 +62,20 @@ function setEventHandler( )
 		recognition = null;
 	};
 
-	// 終わったら
+	// 接続が切れたら
 	recognition.onend = (event) => 
+	{
+		//render("停止しました", true);
+		if(!stopButtonPushed)
+		{
+			recognitionStart( );
+			return;
+		}
+		recognitionStop( );
+	};
+
+	// 音が途切れたら
+	recognition.onsoundend = (event) => 
 	{
 		//render("停止しました", true);
 		if(!stopButtonPushed)
