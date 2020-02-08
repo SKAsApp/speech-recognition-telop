@@ -4,7 +4,7 @@ speech-recognition-telop
 
 Speech Recognition Telop for Japanese broadcasting
 
-If you speak English, please read ["English version"](./README.en.md)
+If you speak English, please read [English version](./README.en.md)
 
 
 ## 注意
@@ -34,6 +34,6 @@ If you speak English, please read ["English version"](./README.en.md)
 
 ## 試用
 
-SKAのニコ生（SKA’s community　["co2335074"](https://com.nicovideo.jp/community/co2335074)）で2019年8月より運用しています。しばらく配信していないのでご覧になることはできません。
+SKAのニコ生（SKA’s community　[co2335074](https://com.nicovideo.jp/community/co2335074)）で2019年8月より運用しています。しばらく配信していないのでご覧になることはできません。
 
-使ってみたい場合["こちら"](https://skasapp.github.io/speech-recognition-telop/web-speech/index.html)からお試しください。URLは数か月以内に変更する予定なので，ブックマークはリンク先ではなく，このページにするようお願いします。
+使ってみたい場合[こちら](https://skasapp.github.io/speech-recognition-telop/web-speech/index.html)からお試しください。URLは数か月以内に変更する予定なので，ブックマークはリンク先ではなく，このページにするようお願いします。

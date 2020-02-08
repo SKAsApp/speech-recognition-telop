@@ -4,7 +4,7 @@ speech-recognition-telop
 
 Speech Recognition Telop for Japanese broadcasting
 
-日本人の方は["こちらから日本語版"](./README.md)をお読みください。
+日本人の方は[こちらから日本語版](./README.md)をお読みください。
 
 
 ## Cautions
@@ -34,6 +34,6 @@ I will add a function of recording results of speech recognition with time stamp
 
 ## Trial
 
-This app used in SKA’s niconico Live（SKA’s community　["co2335074"](https://com.nicovideo.jp/community/co2335074)）.
+This app used in SKA’s niconico Live（SKA’s community　[co2335074](https://com.nicovideo.jp/community/co2335074)）.
 
-If you try, please click ["here"](https://skasapp.github.io/speech-recognition-telop/web-speech/index.html). But this link will be changed in a several months.
+If you try, please click [here](https://skasapp.github.io/speech-recognition-telop/web-speech/index.html). But this link will be changed in a several months.
