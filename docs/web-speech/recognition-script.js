@@ -65,13 +65,7 @@ function setEventHandler( )
 	// 接続が切れたら
 	recognition.onend = (event) => 
 	{
-		//render("停止しました", true);
-		if(!stopButtonPushed)
-		{
-			recognitionStart( );
-			return;
-		}
-		recognitionStop( );
+		//render("接続が切れました", true);
 	};
 
 	// 音が途切れたら
