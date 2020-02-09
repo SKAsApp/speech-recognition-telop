@@ -55,7 +55,7 @@ function setEventHandler( )
 	// エラーだったら
 	recognition.onerror = (event) => 
 	{
-		console.log("エラーが発生しました。" + event.error);
+		console.log("エラーが発生しました。" + String(event.error) + "　speaking：" + String(speaking));
 		if (!speaking)
 		{
 			recognitionStart( );
