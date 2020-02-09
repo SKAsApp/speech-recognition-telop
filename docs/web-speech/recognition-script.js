@@ -202,7 +202,6 @@ function getJson( )
 	link.href = url;
 	link.download = "音声認識テロップ " + String(startTime.getFullYear( )) + "-" + ("00" + String(Number(startTime.getMonth( ) + 1))).slice(-2) + "-" + ("00" + String(startTime.getDate( ))).slice(-2) + ".json";
 	link.click( );
-	link.parentNode.removeChild(link);
 }
 
 // 信頼度表示変更

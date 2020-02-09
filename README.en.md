@@ -55,7 +55,7 @@ Recording format is a JSON such as the next. But I changed the value to the expl
 			"millisecond": "Number: “Millisecond” counted from the time when the start button was clicked"
 		},
 		"transcript": "String: The result of speech recognition",
-		"confidence": "Number: confidence of the result of speech recognition"
+		"confidence": "Number: Confidence of the result of speech recognition"
 	}
 ]
 
@@ -75,6 +75,7 @@ Recording format is a JSON such as the next. But I changed the value to the expl
 
 YYYY/MM/DD（Year/Month/Date）
 
+- 2020/02/09　Ver 1.1.1：very small fix
 - 2020/02/09　Ver 1.1.0：adding the simply record function
 - 2020/02/08　Ver 1.0.1：fix the bug of 1.0.0
 - 2020/02/08　Ver 1.0.0：you can choose display confidence or not
