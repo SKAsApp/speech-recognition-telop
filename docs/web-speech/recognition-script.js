@@ -68,7 +68,7 @@ function setEventHandler( )
 	recognition.onend = (event) => 
 	{
 		console.log("接続が切れました。");
-		if (!speaking || !stopButtonPushed)
+		if (!stopButtonPushed)
 		{
 			recognitionStart( );
 			return;
