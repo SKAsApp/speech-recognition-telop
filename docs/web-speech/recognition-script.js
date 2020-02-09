@@ -7,12 +7,15 @@ let speaking = false;
 let stopButtonPushed = false;
 let recognition = null;
 let confidenceMode = false;
+let startTime = null;
+let rid = -1;
+let previousLog = [ ];
 window.SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
-if(!"SpeechRecognition" in window)
+if (!"SpeechRecognition" in window)
 {
 	window.alert("ご利用のブラウザーは音声認識に対応していません。\r\n制限なく利用するためには Google Chrome をお使いください。");
 }
-else if(!((agent.indexOf("Chrome") != -1) && (agent.indexOf("Edge") == -1) && (agent.indexOf("OPR") == -1) && (agent.indexOf("Edg") == -1)))
+else if (!((agent.indexOf("Chrome") != -1) && (agent.indexOf("Edge") == -1) && (agent.indexOf("OPR") == -1) && (agent.indexOf("Edg") == -1)))
 {
 	window.alert("ご利用のブラウザーは音声認識に部分的にしか対応していません。\r\n制限なく利用するためには Google Chrome をお使いください。");
 }
@@ -52,8 +55,8 @@ function setEventHandler( )
 	// エラーだったら
 	recognition.onerror = (event) => 
 	{
-		//render("エラーが発生しました", true);
-		if(!speaking)
+		console.log("エラーが発生しました。" + event.error);
+		if (!speaking)
 		{
 			recognitionStart( );
 			return;
@@ -65,16 +68,17 @@ function setEventHandler( )
 	// 接続が切れたら
 	recognition.onend = (event) => 
 	{
-		//render("接続が切れました", true);
+		console.log("接続が切れました。");
 	};
 
 	// 音が途切れたら
 	recognition.onsoundend = (event) => 
 	{
 		//render("停止しました", true);
-		if(!stopButtonPushed)
+		if (!stopButtonPushed)
 		{
-			recognitionStart( );
+			stopButtonPushed = false;
+			speechRecognition( );
 			return;
 		}
 		recognitionStop( );
@@ -90,23 +94,27 @@ function setEventHandler( )
 	recognition.onresult = (event) => 
 	{
 		// 結果取得
-		for(let i = event.resultIndex; i < event.results.length; i += 1)
+		for (let i = event.resultIndex; i < event.results.length; i += 1)
 		{
-			let transcript = event.results[i][0].transcript;
+			const transcript = event.results[i][0].transcript;
 			let response = transcript;
-			if(confidenceMode)
+			const confidence = event.results[i][0].confidence
+			if (confidenceMode)
 			{
-				let confidence = event.results[i][0].confidence.toString( );
-				response = transcript + '<span class="confidence"> （' + confidence.substr(0, 5) + '）</span>';
+				const confidenceString = confidence.toString( ).substr(0, 5);
+				response = transcript + '<span class="confidence"> （' + confidenceString + '）</span>';
 			}
 			// 表示欄に入りきらなくなったら再起動
-			if(response.length > 111)
+			if (response.length > 111)
 			{
 				restart( );
 			}
+			// 描画
 			render(response, false);
-			if(event.results[i].isFinal)
+			// 認識確定してたら
+			if (event.results[i].isFinal)
 			{
+				simplyRecord(transcript, confidence);
 				speechRecognition( );
 				return;
 			}
@@ -118,7 +126,7 @@ function setEventHandler( )
 // 描画
 function render(string, isSystemMessage)
 {
-	if(isSystemMessage)
+	if (isSystemMessage)
 	{
 		renderSubtitle('<span class="system">' + string + '</span>');
 		return;
@@ -132,6 +140,33 @@ function renderSubtitle(string)
 	subtitle.insertAdjacentHTML("afterbegin", string);
 }
 
+// 簡易保存機能（のちほどサーバーサイドに移行し，高度な機能もつける予定）
+function simplyRecord(rtranscript, rconfidence)
+{
+	rid += 1;
+	const now = new Date( );
+	const timeDiff = new Date(now.getTime( ) - startTime.getTime( ));
+	const log = {
+		id: rid,
+		time: 
+		{
+			hour: now.getHours( ),
+			minute: now.getMinutes( ),
+			second: now.getSeconds( )
+		},
+		interval: 
+		{
+			hour: timeDiff.getUTCHours( ),
+			minute: timeDiff.getUTCMinutes( ),
+			second: timeDiff.getUTCSeconds( ),
+			millisecond: timeDiff.getUTCMilliseconds( )
+		},
+		transcript: rtranscript,
+		confidence: rconfidence
+	};
+	previousLog.push(log);
+}
+
 // 言語選択変わったら
 function changeLanguage( )
 {
@@ -139,23 +174,59 @@ function changeLanguage( )
 }
 
 // 開始ボタン押したら
-function recognitionStart( )
+function recognitionStartClick( )
 {
-	stopButtonPushed = false;
-	speechRecognition( );
+	previousLog = [ ];
+	startTime = new Date( );
+	recognitionStart( );
 }
 
 // 終了ボタン押したら
-function recognitionStop( )
+function recognitionStopClick( )
 {
-	stopButtonPushed = true;
-	recognition.stop( );
+	recognitionStop( );
+}
+
+// 保存ボタン押したら
+function getJson( )
+{
+	if (startTime == null)
+	{
+		return;
+	}
+	const tempJson = JSON.stringify(previousLog, null, "\t");
+	const logJson = tempJson.replace(/\n/g, "\r\n") + "\r\n";
+	const blob = new Blob([logJson], {type: "application/json"});
+	const url = window.URL.createObjectURL(blob);
+	const link = document.createElement("a");
+	link.href = url;
+	link.download = "音声認識テロップ " + String(startTime.getFullYear( )) + "-" + ("00" + String(Number(startTime.getMonth( ) + 1))).slice(-2) + "-" + ("00" + String(startTime.getDate( ))).slice(-2) + ".json";
+	link.click( );
+	link.parentNode.removeChild(link);
 }
 
 // 信頼度表示変更
 function setConfidenceMode(mode)
 {
 	confidenceMode = mode;
+}
+
+// 開始・終了関係
+function recognitionStart( )
+{
+	stopButtonPushed = false;
+	speechRecognition( );
+}
+
+function recognitionStop( )
+{
+	stopButtonPushed = true;
+	if (recognition == null)
+	{
+		return;
+	}
+	recognition.stop( );
+	recognition = null;
 }
 
 function restart( )
