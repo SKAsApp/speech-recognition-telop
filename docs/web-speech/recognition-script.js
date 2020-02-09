@@ -47,7 +47,6 @@ function initialize( )
 	recognition.lang = language;
 	recognition.continuous = true;
 	recognition.interimResults = true;
-	// render("インスタンス生成しました", true);
 }
 
 function setEventHandler( )
@@ -55,10 +54,10 @@ function setEventHandler( )
 	// エラーだったら
 	recognition.onerror = (event) => 
 	{
-		console.log("エラーが発生しました。" + String(event.error) + "　speaking：" + String(speaking));
-		if (!speaking)
+		console.log("エラーが発生しました。" + String(event.error) + "　speaking：" + String(speaking) + "　stopButtonPushed：" + String(stopButtonPushed));
+		if (!speaking && !stopButtonPushed)
 		{
-			recognitionStart( );
+			restart( );
 			return;
 		}
 		recognitionStop( );
@@ -73,10 +72,11 @@ function setEventHandler( )
 	// 音が途切れたら
 	recognition.onsoundend = (event) => 
 	{
+		console.log("音が途切れました。" + "　stopButtonPushed：" + String(stopButtonPushed));
 		if (!stopButtonPushed)
 		{
 			stopButtonPushed = false;
-			speechRecognition( );
+			restart( );
 			return;
 		}
 		recognitionStop( );
