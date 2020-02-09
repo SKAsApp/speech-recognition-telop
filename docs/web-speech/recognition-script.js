@@ -56,7 +56,7 @@ function setEventHandler( )
 	recognition.onerror = (event) => 
 	{
 		console.log("エラーが発生しました。" + event.error);
-		if (!speaking)
+		if (!speaking || !stopButtonPushed)
 		{
 			recognitionStart( );
 			return;
@@ -114,7 +114,7 @@ function setEventHandler( )
 			// 認識確定してたら
 			if (event.results[i].isFinal)
 			{
-				simplyRecord(transcript, confidence);
+				// simplyRecord(transcript, confidence);
 				speechRecognition( );
 				return;
 			}
