@@ -56,7 +56,7 @@ function setEventHandler( )
 	recognition.onerror = (event) => 
 	{
 		console.log("エラーが発生しました。" + event.error);
-		if (!speaking || !stopButtonPushed)
+		if (!speaking)
 		{
 			recognitionStart( );
 			return;
@@ -68,12 +68,6 @@ function setEventHandler( )
 	recognition.onend = (event) => 
 	{
 		console.log("接続が切れました。");
-		if (!stopButtonPushed)
-		{
-			recognitionStart( );
-			return;
-		}
-		recognitionStop( );
 	};
 
 	// 音が途切れたら
@@ -91,7 +85,7 @@ function setEventHandler( )
 	// 認識できなかったら
 	recognition.onnomatch = (event) => 
 	{
-		//render("認識できませんでした　もう1度お話ください", true);
+		console.log("認識できませんでした。");
 	};
 
 	// 認識したら
@@ -118,8 +112,8 @@ function setEventHandler( )
 			// 認識確定してたら
 			if (event.results[i].isFinal)
 			{
-				// simplyRecord(transcript, confidence);
-				speechRecognition( );
+				simplyRecord(transcript, confidence);
+				restart( );
 				return;
 			}
 			speaking = true;
