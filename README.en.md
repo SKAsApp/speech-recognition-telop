@@ -75,7 +75,7 @@ Recording format is a JSON such as the next. But I changed the value to the expl
 
 YYYY/MM/DD（Year/Month/Date）
 
-- 2020/02/09　Ver 1.1.2：because the behavior might be unstable, put the master branch back to Ver 1.0.1, and created dev1.1record branch
+- 2020/02/09　Ver 1.0.2：because the behavior might be unstable, put the master branch back to Ver 1.0.1, and created dev1.1record branch
 - 2020/02/09　Ver 1.1.1：very small fix
 - 2020/02/09　Ver 1.1.0：adding the simply record function
 - 2020/02/08　Ver 1.0.1：fix the bug of 1.0.0
