@@ -32,7 +32,7 @@ You can record results of speech recognition with time stamp (experimental). You
 
 This app used in SKA’s niconico Live（SKA’s community　[co2335074](https://com.nicovideo.jp/community/co2335074)）.
 
-If you try, please click [here](https://skasapp.github.io/speech-recognition-telop/web-speech/index.html). But this link will be changed in a several months.
+If you try, please “[click here](https://skasapp.github.io/speech-recognition-telop/web-speech/index.html)”. But this link will be changed in a several months.
 
 
 ## Recording Format
