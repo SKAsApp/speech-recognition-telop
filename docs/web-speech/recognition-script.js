@@ -62,19 +62,23 @@ function setEventHandler( )
 			return;
 		}
 		recognitionStop( );
-		recognition = null;
 	};
 
 	// 接続が切れたら
 	recognition.onend = (event) => 
 	{
 		console.log("接続が切れました。");
+		if (!speaking || !stopButtonPushed)
+		{
+			recognitionStart( );
+			return;
+		}
+		recognitionStop( );
 	};
 
 	// 音が途切れたら
 	recognition.onsoundend = (event) => 
 	{
-		//render("停止しました", true);
 		if (!stopButtonPushed)
 		{
 			stopButtonPushed = false;
