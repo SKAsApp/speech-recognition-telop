@@ -10,6 +10,8 @@ let confidenceMode = false;
 let startTime = null;
 let rid = -1;
 let previousLog = [ ];
+let transcript = "";
+let confidence = 0.0;
 window.SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
 if (!"SpeechRecognition" in window)
 {
@@ -47,6 +49,7 @@ function initialize( )
 	recognition.lang = language;
 	recognition.continuous = true;
 	recognition.interimResults = true;
+	recognition.maxAlternatives = 1;
 }
 
 function setEventHandler( )
@@ -60,22 +63,28 @@ function setEventHandler( )
 			restart( );
 			return;
 		}
+		if (speaking && !stopButtonPushed)
+		{
+			simplyRecord(transcript, confidence);
+			restart( );
+			return;
+		}
 		recognitionStop( );
+		simplyRecord(transcript, confidence);
 	};
 
 	// 接続が切れたら
 	recognition.onend = (event) => 
 	{
-		console.log("接続が切れました。");
+		console.log("接続が切れました。" + "　speaking：" + String(speaking) + "　stopButtonPushed：" + String(stopButtonPushed));
 	};
 
 	// 音が途切れたら
 	recognition.onsoundend = (event) => 
 	{
-		console.log("音が途切れました。" + "　stopButtonPushed：" + String(stopButtonPushed));
-		if (!stopButtonPushed)
+		console.log("音が途切れました。" + "　speaking：" + String(speaking) + "　stopButtonPushed：" + String(stopButtonPushed));
+		if (!speaking && !stopButtonPushed)
 		{
-			stopButtonPushed = false;
 			restart( );
 			return;
 		}
@@ -92,32 +101,33 @@ function setEventHandler( )
 	recognition.onresult = (event) => 
 	{
 		// 結果取得
-		for (let i = event.resultIndex; i < event.results.length; i += 1)
+		transcript = event.results[0][0].transcript;
+		let response = transcript;
+		confidence = event.results[0][0].confidence;
+		if (confidenceMode)
 		{
-			const transcript = event.results[i][0].transcript;
-			let response = transcript;
-			const confidence = event.results[i][0].confidence
-			if (confidenceMode)
-			{
-				const confidenceString = confidence.toString( ).substr(0, 5);
-				response = transcript + '<span class="confidence"> （' + confidenceString + '）</span>';
-			}
-			// 表示欄に入りきらなくなったら再起動
-			if (response.length > 111)
-			{
-				restart( );
-			}
-			// 描画
-			render(response, false);
-			// 認識確定してたら
-			if (event.results[i].isFinal)
-			{
-				simplyRecord(transcript, confidence);
-				restart( );
-				return;
-			}
-			speaking = true;
+			const confidenceString = confidence.toString( ).substr(0, 5);
+			response = transcript + '<span class="confidence"> （' + confidenceString + '）</span>';
 		}
+		// 表示欄に入りきらなくなったら再起動
+		if (response.length > 111)
+		{
+			restart( );
+		}
+		// 描画
+		render(response, false);
+		// 認識確定してたら
+		if (event.results[0].isFinal)
+		{
+			speaking = false;
+			simplyRecord(transcript, confidence);
+			if (!stopButtonPushed)
+			{
+				restart( );
+			}
+			return;
+		}
+		speaking = true;
 	};
 }
 
@@ -141,6 +151,10 @@ function renderSubtitle(string)
 // 簡易保存機能（のちほどサーバーサイドに移行し，高度な機能もつける予定）
 function simplyRecord(rtranscript, rconfidence)
 {
+	if (startTime == null)
+	{
+		return;
+	}
 	rid += 1;
 	const now = new Date( );
 	const timeDiff = new Date(now.getTime( ) - startTime.getTime( ));
@@ -174,14 +188,19 @@ function changeLanguage( )
 // 開始ボタン押したら
 function recognitionStartClick( )
 {
-	previousLog = [ ];
-	startTime = new Date( );
+	if (startTime == null)
+	{
+		previousLog = [ ];
+		startTime = new Date( );
+	}
+	stopButtonPushed = false;
 	recognitionStart( );
 }
 
 // 終了ボタン押したら
 function recognitionStopClick( )
 {
+	stopButtonPushed = true;
 	recognitionStop( );
 }
 
@@ -211,19 +230,19 @@ function setConfidenceMode(mode)
 // 開始・終了関係
 function recognitionStart( )
 {
-	stopButtonPushed = false;
+	// stopButtonPushed = false;
 	speechRecognition( );
 }
 
 function recognitionStop( )
 {
-	stopButtonPushed = true;
 	if (recognition == null)
 	{
 		return;
 	}
 	recognition.stop( );
 	recognition = null;
+	// stopButtonPushed = true;
 }
 
 function restart( )
