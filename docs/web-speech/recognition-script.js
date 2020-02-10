@@ -83,12 +83,6 @@ function setEventHandler( )
 	recognition.onsoundend = (event) => 
 	{
 		console.log("音が途切れました。" + "　speaking：" + String(speaking) + "　stopButtonPushed：" + String(stopButtonPushed));
-		if (!speaking && !stopButtonPushed)
-		{
-			restart( );
-			return;
-		}
-		recognitionStop( );
 	};
 
 	// 認識できなかったら
