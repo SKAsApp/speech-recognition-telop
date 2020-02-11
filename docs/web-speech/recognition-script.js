@@ -22,9 +22,11 @@ else if (!((agent.indexOf("Chrome") != -1) && (agent.indexOf("Edge") == -1) && (
 	window.alert("ご利用のブラウザーは音声認識に部分的にしか対応していません。\r\n制限なく利用するためには Google Chrome をお使いください。");
 }
 window.onunload = function( ){ };
-// HTMLが読み込まれたら出力先の要素を取得する
+// HTMLが読み込まれたら，音声認識インスタンスを生成し，出力先の要素を取得する
 document.addEventListener("DOMContentLoaded", ( ) => 
 {
+	initialize( );
+	setEventHandler( );
 	subtitle = document.getElementById("subtitle");
 	languageSelector = document.getElementById("language");
 	languageSelector.addEventListener("change", (event) => 
@@ -45,6 +47,7 @@ function speechRecognition( )
 // 初期化処理
 function initialize( )
 {
+	console.log("インスタンス生成しました。");
 	recognition = new SpeechRecognition( );
 	recognition.lang = language;
 	recognition.continuous = true;
@@ -58,6 +61,27 @@ function setEventHandler( )
 	recognition.onerror = (event) => 
 	{
 		console.log("エラーが発生しました。" + String(event.error) + "　speaking：" + String(speaking) + "　stopButtonPushed：" + String(stopButtonPushed));
+		// if (!speaking && !stopButtonPushed)
+		// {
+		// 	restart( );
+		// 	return;
+		// }
+		// if (speaking && !stopButtonPushed)
+		// {
+		// 	simplyRecord(transcript, confidence);
+		// 	recognition.abort( );
+		// 	recognition = null;
+		// 	restart( );
+		// 	return;
+		// }
+		// recognitionStop( );
+		// simplyRecord(transcript, confidence);
+	};
+
+	// 接続が切れたら
+	recognition.onend = (event) => 
+	{
+		console.log("接続が切れました。" + "　speaking：" + String(speaking) + "　stopButtonPushed：" + String(stopButtonPushed));
 		if (!speaking && !stopButtonPushed)
 		{
 			restart( );
@@ -70,13 +94,7 @@ function setEventHandler( )
 			return;
 		}
 		recognitionStop( );
-		simplyRecord(transcript, confidence);
-	};
-
-	// 接続が切れたら
-	recognition.onend = (event) => 
-	{
-		console.log("接続が切れました。" + "　speaking：" + String(speaking) + "　stopButtonPushed：" + String(stopButtonPushed));
+		// simplyRecord(transcript, confidence);
 	};
 
 	// 音が途切れたら
@@ -106,19 +124,21 @@ function setEventHandler( )
 		// 表示欄に入りきらなくなったら再起動
 		if (response.length > 111)
 		{
-			restart( );
+			// restart( );
+			recognitionStop( );
 		}
 		// 描画
 		render(response, false);
 		// 認識確定してたら
 		if (event.results[0].isFinal)
 		{
+			console.log("確定。");
 			speaking = false;
 			simplyRecord(transcript, confidence);
-			if (!stopButtonPushed)
-			{
-				restart( );
-			}
+			// if (!stopButtonPushed)
+			// {
+			// 	restart( );
+			// }
 			return;
 		}
 		speaking = true;
@@ -149,6 +169,7 @@ function simplyRecord(rtranscript, rconfidence)
 	{
 		return;
 	}
+	console.log("記録。")
 	rid += 1;
 	const now = new Date( );
 	const timeDiff = new Date(now.getTime( ) - startTime.getTime( ));
@@ -177,6 +198,10 @@ function simplyRecord(rtranscript, rconfidence)
 function changeLanguage( )
 {
 	language = languageSelector.value;
+	if (recognition != null)
+	{
+		recognition.lang = language;
+	}
 }
 
 // 開始ボタン押したら
@@ -224,8 +249,9 @@ function setConfidenceMode(mode)
 // 開始・終了関係
 function recognitionStart( )
 {
-	// stopButtonPushed = false;
-	speechRecognition( );
+	// speechRecognition( );
+	speaking = false;
+	recognition.start( );
 }
 
 function recognitionStop( )
@@ -235,12 +261,16 @@ function recognitionStop( )
 		return;
 	}
 	recognition.stop( );
-	recognition = null;
-	// stopButtonPushed = true;
+	// recognition = null;
 }
 
 function restart( )
 {
+	if (recognition == null)
+	{
+		console.log("再起動できません。");
+		return;
+	}
 	recognitionStop( );
 	recognitionStart( );
 }
