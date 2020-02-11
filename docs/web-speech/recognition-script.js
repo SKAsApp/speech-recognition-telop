@@ -256,21 +256,21 @@ function recognitionStart( )
 
 function recognitionStop( )
 {
-	if (recognition == null)
-	{
-		return;
-	}
+	// if (recognition == null)
+	// {
+	// 	return;
+	// }
 	recognition.stop( );
 	// recognition = null;
 }
 
 function restart( )
 {
-	if (recognition == null)
-	{
-		console.log("再起動できません。");
-		return;
-	}
+	// if (recognition == null)
+	// {
+	// 	console.log("再起動できません。");
+	// 	return;
+	// }
 	recognitionStop( );
 	recognitionStart( );
 }
