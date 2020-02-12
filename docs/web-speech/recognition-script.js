@@ -113,9 +113,9 @@ function setEventHandler( )
 	recognition.onresult = (event) => 
 	{
 		// 結果取得
-		transcript = event.results[0][0].transcript;
+		transcript = event.results[event.results.length - 1][0].transcript;
 		let response = transcript;
-		confidence = event.results[0][0].confidence;
+		confidence = event.results[event.results.length - 1][0].confidence;
 		if (confidenceMode)
 		{
 			const confidenceString = confidence.toString( ).substr(0, 5);
@@ -130,7 +130,7 @@ function setEventHandler( )
 		// 描画
 		render(response, false);
 		// 認識確定してたら
-		if (event.results[0].isFinal)
+		if (event.results[event.results.length - 1].isFinal)
 		{
 			console.log("確定。");
 			speaking = false;
@@ -271,6 +271,7 @@ function restart( )
 	// 	console.log("再起動できません。");
 	// 	return;
 	// }
+	console.log("再起動。");
 	recognitionStop( );
 	recognitionStart( );
 }
