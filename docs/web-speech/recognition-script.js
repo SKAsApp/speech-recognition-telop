@@ -61,21 +61,6 @@ function setEventHandler( )
 	recognition.onerror = (event) => 
 	{
 		console.log("エラーが発生しました。" + String(event.error) + "　speaking：" + String(speaking) + "　stopButtonPushed：" + String(stopButtonPushed));
-		// if (!speaking && !stopButtonPushed)
-		// {
-		// 	restart( );
-		// 	return;
-		// }
-		// if (speaking && !stopButtonPushed)
-		// {
-		// 	simplyRecord(transcript, confidence);
-		// 	recognition.abort( );
-		// 	recognition = null;
-		// 	restart( );
-		// 	return;
-		// }
-		// recognitionStop( );
-		// simplyRecord(transcript, confidence);
 	};
 
 	// 接続が切れたら
@@ -94,13 +79,12 @@ function setEventHandler( )
 			return;
 		}
 		recognitionStop( );
-		// simplyRecord(transcript, confidence);
 	};
 
 	// 音が途切れたら
 	recognition.onsoundend = (event) => 
 	{
-		console.log("音が途切れました。" + "　speaking：" + String(speaking) + "　stopButtonPushed：" + String(stopButtonPushed));
+		
 	};
 
 	// 認識できなかったら
@@ -114,18 +98,12 @@ function setEventHandler( )
 	{
 		// 結果取得
 		transcript = event.results[event.results.length - 1][0].transcript;
-		let response = transcript;
+		let response = transcript.slice(-111);
 		confidence = event.results[event.results.length - 1][0].confidence;
 		if (confidenceMode)
 		{
-			const confidenceString = confidence.toString( ).substr(0, 5);
-			response = transcript + '<span class="confidence"> （' + confidenceString + '）</span>';
-		}
-		// 表示欄に入りきらなくなったら再起動
-		if (response.length > 111)
-		{
-			// restart( );
-			recognitionStop( );
+			const confidenceString = confidence.toString( ).slice(0, 5);
+			response = (transcript + '<span class="confidence"> （' + confidenceString + '）</span>').slice(-147);
 		}
 		// 描画
 		render(response, false);
@@ -135,10 +113,6 @@ function setEventHandler( )
 			console.log("確定。");
 			speaking = false;
 			simplyRecord(transcript, confidence);
-			// if (!stopButtonPushed)
-			// {
-			// 	restart( );
-			// }
 			return;
 		}
 		speaking = true;
@@ -256,21 +230,11 @@ function recognitionStart( )
 
 function recognitionStop( )
 {
-	// if (recognition == null)
-	// {
-	// 	return;
-	// }
 	recognition.stop( );
-	// recognition = null;
 }
 
 function restart( )
 {
-	// if (recognition == null)
-	// {
-	// 	console.log("再起動できません。");
-	// 	return;
-	// }
 	console.log("再起動。");
 	recognitionStop( );
 	recognitionStart( );

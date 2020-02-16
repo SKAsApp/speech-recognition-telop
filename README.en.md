@@ -32,7 +32,7 @@ You can record results of speech recognition with time stamp (experimental). You
 
 This app used in SKA’s niconico Live（SKA’s community　[co2335074](https://com.nicovideo.jp/community/co2335074)）.
 
-If you try, please “[click here](https://skasapp.github.io/speech-recognition-telop/web-speech/index.html)”. But this link will be changed in a several months.
+If you try, please “[click here](https://skasapp.github.io/speech-recognition-telop/index.html)”. But this link will be changed in a several months.
 
 
 ## Recording Format
@@ -64,9 +64,13 @@ Recording format is a JSON such as the next. But I changed the value to the expl
 
 ## Future Plans
 
+I think that this app run stable up to Ver 1.1.4. I will add original functions.
+
 - not only Web Speech API, supporting Azure (merit of accuracy, license, and punctuation).
 - not only client side, adding server side
 	- after processing of results of speech recognition
+		- inserting kuten (ending symbol like period)
+		- correcting interjection, for example, “etto” (means “well …”) is recognized “8” or “a to”
 	- more convenient record function, for exaple, keyword extraction
 	- generating SRT and WebVTT subtitles
 
@@ -75,6 +79,7 @@ Recording format is a JSON such as the next. But I changed the value to the expl
 
 YYYY/MM/DD（Year/Month/Date）
 
+- 2020/02/16　Ver 1.1.4：changed UI ＆ changed restart process ＆ dealed with problem of Chrome ＆ changed restriction of number of characters
 - 2020/02/10　Ver 1.1.3：keep results until reload
 - 2020/02/09　Ver 1.1.2：changed restart condition and restored simply record function
 - 2020/02/09　Ver 1.0.3：reviewed error handling
@@ -85,3 +90,13 @@ YYYY/MM/DD（Year/Month/Date）
 - 2020/02/08　Ver 1.0.0：you can choose display confidence or not
 - 2020/02/07　Ver 0.1.0：first version (but used from 2019/08/31)
 - 2020/02/07　Ver 0.0.0：creating this repository
+
+
+## Links
+
+SKA’s Links
+
+- niconico community：[co2335074](https://com.nicovideo.jp/community/co2335074)
+- YouTube channel：[https://youtube.com/c/0150159SK](https://youtube.com/c/0150159SK)
+- blomaga：[ar1739328](https://ch.nicovideo.jp/skas-web/blomaga/ar1739328)
+- Twitter：[@SK_Animation](https://twitter.com/SK_Animation)

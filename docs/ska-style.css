@@ -4,7 +4,7 @@
 	font-style: normal;
 	font-variant: normal;
 	line-height: 1.8;
-	font-family: "ヒラギノ角ゴ ProN", "Hiragino Kaku Gothic ProN", "游ゴシック", "YuGothic", "HGPｺﾞｼｯｸM", "HGPGothicM", sans-serif;
+	font-family: "ヒラギノ角ゴ ProN", "Hiragino Kaku Gothic ProN", "游ゴシック", "游ゴシック体", "YuGothic", "Yu Gothic", "HGPｺﾞｼｯｸM", "HGPGothicM", sans-serif;
 	font-weight: 500;
 }
 
@@ -40,31 +40,52 @@ a:visited
 h1
 {
 	font-size: 200%;
-	font-family: "ヒラギノ角ゴ ProN", "Hiragino Kaku Gothic ProN", "游ゴシック", "YuGothic", "HGPｺﾞｼｯｸE", sans-serif;
+	font-family: "ヒラギノ角ゴ ProN", "Hiragino Kaku Gothic ProN", "游ゴシック", "游ゴシック体", "YuGothic", "Yu Gothic", "HGPｺﾞｼｯｸE", "HGPGothicE", sans-serif;
 	font-weight: 700;
 	text-align: center;
 	color: #00ff00;
+	margin-top: 30pt;
+	margin-bottom: 0pt;
 }
 
 h2
 {
 	font-size: 150%;
-	font-family: "ヒラギノ角ゴ ProN", "Hiragino Kaku Gothic ProN", "游ゴシック", "YuGothic", "HGPｺﾞｼｯｸE", sans-serif;
+	font-family: "ヒラギノ角ゴ ProN", "Hiragino Kaku Gothic ProN", "游ゴシック", "游ゴシック体", "YuGothic", "Yu Gothic", "HGPｺﾞｼｯｸE", "HGPGothicE", sans-serif;
 	font-weight: 700;
-	color: #cfa0ff;;
+	color: #80ffff;
+	margin-top: 30pt;
+	margin-bottom: 0pt;
+	padding: 3pt 8pt;
+	border-left: 12pt solid #00ffff;
+	border-bottom: 2pt solid #00ffff;
+	background-color: #202020;
 }
 
 h3
 {
 	font-size: 125%;
-	font-family: "ヒラギノ角ゴ ProN", "Hiragino Kaku Gothic ProN", "游ゴシック", "YuGothic", "HGPｺﾞｼｯｸE", sans-serif;
+	font-family: "ヒラギノ角ゴ ProN", "Hiragino Kaku Gothic ProN", "游ゴシック", "游ゴシック体", "YuGothic", "Yu Gothic", "HGPｺﾞｼｯｸE", "HGPGothicE", sans-serif;
 	font-weight: 700;
-	color: #ffff00;
+	color: #cfa0ff;
+	margin-top: 20pt;
+	margin-bottom: 0pt;
+}
+
+h4
+{
+	font-size: 115%;
+	font-family: "ヒラギノ角ゴ ProN", "Hiragino Kaku Gothic ProN", "游ゴシック", "游ゴシック体", "YuGothic", "Yu Gothic", "HGPｺﾞｼｯｸE", "HGPGothicE", sans-serif;
+	font-weight: 700;
+	color: #ff8000;
+	margin-top: 10pt;
+	margin-bottom: 0pt;
 }
 
 p.aa
 {
-	font-family: "ヒラギノ角ゴ ProN", "HiraKakuProN", "游ゴシック Medium", "YuGothic Medium", sans-serif;
+	font-family: "ヒラギノ角ゴ ProN", "Hiragino Kaku Gothic ProN", "游ゴシック", "游ゴシック体", "YuGothic", "Yu Gothic", sans-serif;
+	font-weight: 500;
 	color: #f0a6bd;
 	line-height: 1.0;
 }
@@ -80,12 +101,6 @@ p.aa
 	color: #ffff00;
 }
 
-.small-yellow
-{
-	font-size: 100%;
-	color: #ffff00;
-}
-
 strong.cyan
 {
 	font-size: 150%;
@@ -94,13 +109,9 @@ strong.cyan
 
 strong
 {
-	font-size: 150%;
-}
-
-strong.bold
-{
 	font-size: 100%;
-	font-family: "ヒラギノ角ゴ ProN", "Hiragino Kaku Gothic ProN", "HiraKakuProN", "游ゴシック", "YuGothic", "HGPｺﾞｼｯｸE", sans-serif;
+	color: #ffff00;
+	font-family: "ヒラギノ角ゴ ProN", "Hiragino Kaku Gothic ProN", "游ゴシック", "游ゴシック体", "YuGothic", "Yu Gothic", "HGPｺﾞｼｯｸE", "HGPGothicE", sans-serif;
 	font-weight: 700;
 }
 

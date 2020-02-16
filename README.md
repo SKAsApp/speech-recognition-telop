@@ -30,14 +30,14 @@ If you speak English, please read [English version](./README.en.md)
 
 ## 試用
 
-SKAのニコ生（SKA’s community　[co2335074](https://com.nicovideo.jp/community/co2335074)）で2019年8月より運用しています。（しかし，しばらく配信していないのでご覧になることはできません）
+SKAのニコ生（SKA’s community　[co2335074](https://com.nicovideo.jp/community/co2335074)）で2019年8月より運用しています。
 
-使ってみたい場合「[こちらから](https://skasapp.github.io/speech-recognition-telop/web-speech/index.html)」お試しください。URLは数か月以内に変更する予定なので，ブックマークはリンク先ではなく，このページにするようお願いします。
+使ってみたい場合「[こちらから](https://skasapp.github.io/speech-recognition-telop/index.html)」お試しください。URLは数か月以内に変更する予定なので，ブックマークはリンク先ではなく，このページにするようお願いします。
 
 
 ## 簡易保存機能の記録形式
 
-次のようなJSON形式。ただし，この例では値はその値の説明の文字列にしています。
+次のようなJSON形式。ただし，この例では説明の文字列にしています。
 
 ```JSON
 [
@@ -64,9 +64,13 @@ SKAのニコ生（SKA’s community　[co2335074](https://com.nicovideo.jp/commu
 
 ## 今後の予定
 
+Ver 1.1.4で動作の安定化はできたのではないかと思います。今後は独自機能の追加をしていく予定です。
+
 - Web Speech APIだけでなく，Azureへの対応（高精度化＆ライセンス問題回避＆句読点挿入のため）
 - クライアントサイドだけでなくサーバーサイドの機能も追加
 	- 音声認識結果の後処理
+		- 句点の挿入
+		- 感動詞の修正（例えば「えーっと」が「8」「aと」と認識される問題の修正）
 	- もっと便利な記録機能（キーワード抽出機能等）
 	- SRTおよびWebVTT形式での字幕出力
 
@@ -75,6 +79,7 @@ SKAのニコ生（SKA’s community　[co2335074](https://com.nicovideo.jp/commu
 
 YYYY/MM/DD（年/月/日）
 
+- 2020/02/16　Ver 1.1.4：UIの変更 ＆ 再起動処理の変更 ＆ Chrome問題対処 ＆ 信頼度表示ありの文字数制限変更
 - 2020/02/10　Ver 1.1.3：リロードするまで認識結果を保持するように変更
 - 2020/02/09　Ver 1.1.2：再起動条件の変更と簡易保存機能の復活
 - 2020/02/09　Ver 1.0.3：エラー周りの処理の見直し
@@ -85,3 +90,13 @@ YYYY/MM/DD（年/月/日）
 - 2020/02/08　Ver 1.0.0：信頼度表示のあり／なし選択
 - 2020/02/07　Ver 0.1.0：初版（実質2019/08/31時点のもの）
 - 2020/02/07　Ver 0.0.0：リポジトリ作成
+
+
+## リンク集
+
+SKAの関連ページ
+
+- ニコニコミュ：[co2335074](https://com.nicovideo.jp/community/co2335074)
+- YouTubeチャンネル：[https://youtube.com/c/0150159SK](https://youtube.com/c/0150159SK)
+- ブロマガ：[ar1739328](https://ch.nicovideo.jp/skas-web/blomaga/ar1739328)
+- Twitter：[@SK_Animation](https://twitter.com/SK_Animation)
