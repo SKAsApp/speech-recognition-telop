@@ -2,9 +2,12 @@
 let agent = window.navigator.userAgent;
 let subtitle;
 let languageSelector;
+let buttonStart;
+let buttonStop;
+let buttonSave;
 let language = "ja-JP";
 let speaking = false;
-let stopButtonPushed = false;
+let buttonStopPushed = false;
 let recognition = null;
 let confidenceMode = false;
 let startTime = null;
@@ -21,19 +24,35 @@ else if (!((agent.indexOf("Chrome") != -1) && (agent.indexOf("Edge") == -1) && (
 {
 	window.alert("ご利用のブラウザーは音声認識に部分的にしか対応していません。\r\n制限なく利用するためには Google Chrome をお使いください。");
 }
-window.onunload = function( ){ };
+window.onunload = ( ) => { };
 // HTMLが読み込まれたら，音声認識インスタンスを生成し，出力先の要素を取得する
 document.addEventListener("DOMContentLoaded", ( ) => 
 {
 	initialize( );
 	setEventHandler( );
 	subtitle = document.getElementById("subtitle");
+	buttonStart = document.getElementById("button-start");
+	buttonStop = document.getElementById("button-stop");
+	buttonSave = document.getElementById("button-save");
+	buttonStop.disabled = true;
+	buttonStart.addEventListener("click", (event) => 
+	{
+		recognitionStartClick( );
+	}, false);
+	buttonStop.addEventListener("click", (event) => 
+	{
+		recognitionStopClick( );
+	}, false);
+	buttonSave.addEventListener("click", (event) => 
+	{
+		getJson( );
+	}, false);
 	languageSelector = document.getElementById("language");
 	languageSelector.addEventListener("change", (event) => 
 	{
 		changeLanguage( );
-	});
-});
+	}, false);
+}, false);
 
 
 function speechRecognition( )
@@ -60,19 +79,19 @@ function setEventHandler( )
 	// エラーだったら
 	recognition.onerror = (event) => 
 	{
-		console.log("エラーが発生しました。" + String(event.error) + "　speaking：" + String(speaking) + "　stopButtonPushed：" + String(stopButtonPushed));
+		console.log("エラーが発生しました。" + String(event.error) + "　speaking：" + String(speaking) + "　stopButtonPushed：" + String(buttonStopPushed));
 	};
 
 	// 接続が切れたら
 	recognition.onend = (event) => 
 	{
-		console.log("接続が切れました。" + "　speaking：" + String(speaking) + "　stopButtonPushed：" + String(stopButtonPushed));
-		if (!speaking && !stopButtonPushed)
+		console.log("接続が切れました。" + "　speaking：" + String(speaking) + "　stopButtonPushed：" + String(buttonStopPushed));
+		if (!speaking && !buttonStopPushed)
 		{
 			restart( );
 			return;
 		}
-		if (speaking && !stopButtonPushed)
+		if (speaking && !buttonStopPushed)
 		{
 			simplyRecord(transcript, confidence);
 			restart( );
@@ -186,14 +205,18 @@ function recognitionStartClick( )
 		previousLog = [ ];
 		startTime = new Date( );
 	}
-	stopButtonPushed = false;
+	buttonStopPushed = false;
+	buttonStart.disabled = true;
+	buttonStop.disabled = false;
 	recognitionStart( );
 }
 
 // 終了ボタン押したら
 function recognitionStopClick( )
 {
-	stopButtonPushed = true;
+	buttonStopPushed = true;
+	buttonStop.disabled = true;
+	buttonStart.disabled = false;
 	recognitionStop( );
 }
 
@@ -223,7 +246,6 @@ function setConfidenceMode(mode)
 // 開始・終了関係
 function recognitionStart( )
 {
-	// speechRecognition( );
 	speaking = false;
 	recognition.start( );
 }

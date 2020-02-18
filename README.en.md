@@ -79,6 +79,7 @@ I think that this app run stable up to Ver 1.1.4. I will add original functions.
 
 YYYY/MM/DD（Year/Month/Date）
 
+- 2020/02/18　Ver 1.1.5：made the UI of start and end easier to understand
 - 2020/02/16　Ver 1.1.4：changed UI ＆ changed restart process ＆ dealed with problem of Chrome ＆ changed restriction of number of characters
 - 2020/02/10　Ver 1.1.3：keep results until reload
 - 2020/02/09　Ver 1.1.2：changed restart condition and restored simply record function

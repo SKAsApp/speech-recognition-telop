@@ -26,6 +26,13 @@ button, select
 	line-height: 1.8;
 }
 
+button:disabled
+{
+	background-color: #888888;
+	color: #373737;
+	line-height: 1.8;
+}
+
 div.subtitle-box
 {
 	position: relative;
