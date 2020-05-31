@@ -7,6 +7,15 @@ Speech Recognition Telop for Japanese broadcasting
 If you speak English, please read [English version](./README.en.md)
 
 
+## 概要
+
+生配信時にリアルタイムでテロップを生成するクライアントアプリです。あくまで音声認識の結果を表示・記録するだけであり，実際の音声認識処理は外部のクラウドサービスに任せます。
+
+グリーンバックで表示するのでXSplit BroadcasterやOBS Studioで透過させることが可能です。
+
+簡易的にタイムスタンプ付きで記録する機能もあるので，生配信の後の編集時や，動画撮影時にもお使いください。
+
+
 ## 注意
 
 - 現在Web Speech APIを使用した実装となっているため，Chromium系のブラウザーでのみ動作します。
@@ -19,20 +28,12 @@ If you speak English, please read [English version](./README.en.md)
 - 試用ページは問題ありませんが，プロトコルがHTTPSのサイトに配置しないと動作しません（HTTPでは動きません）。
 
 
-## 概要
-
-生配信時にリアルタイムでテロップを生成するクライアントアプリです。あくまで音声認識の結果を表示・記録するだけであり，実際の音声認識処理は外部のクラウドサービスに任せます。
-
-グリーンバックで表示するのでXSplit BroadcasterやOBS Studioで透過させることが可能です。
-
-簡易的にタイムスタンプ付きで記録する機能もあるので，生配信の後の編集時や，動画撮影時にもお使いください。
-
-
 ## 試用
 
-SKAのニコ生（SKA’s community　[co2335074](https://com.nicovideo.jp/community/co2335074)）で2019年8月より運用しています。
+試用はこちら→ [speech-recognition-telop/index.html](https://skasapp.github.io/speech-recognition-telop/index.html)  
+※ URLは数か月以内に変更する予定なので，ブックマークはリンク先ではなく，このページにするようお願いします。
 
-使ってみたい場合「[こちらから](https://skasapp.github.io/speech-recognition-telop/index.html)」お試しください。URLは数か月以内に変更する予定なので，ブックマークはリンク先ではなく，このページにするようお願いします。
+SKAのニコ生（SKA’s community　[co2335074](https://com.nicovideo.jp/community/co2335074)）で2019年8月より運用しています。
 
 
 ## 簡易保存機能の記録形式
@@ -66,19 +67,22 @@ SKAのニコ生（SKA’s community　[co2335074](https://com.nicovideo.jp/commu
 
 Ver 1.1.4で動作の安定化はできたのではないかと思います。今後は独自機能の追加をしていく予定です。
 
-- Web Speech APIだけでなく，Azureへの対応（高精度化＆ライセンス問題回避＆句読点挿入のため）
+- 一定時間経過後に表示を消すようにする
+- 1文まるまる表示できるようにする（今まさに話している部分しか表示されない問題の対処）
 - クライアントサイドだけでなくサーバーサイドの機能も追加
 	- 音声認識結果の後処理
 		- 句点の挿入
 		- 感動詞の修正（例えば「えーっと」が「8」「aと」と認識される問題の修正）
 	- もっと便利な記録機能（キーワード抽出機能等）
 	- SRTおよびWebVTT形式での字幕出力
+- Web Speech APIだけでなく，Azureへの対応（高精度化＆ライセンス問題回避＆句読点挿入のため）
 
 
 ## 更新履歴
 
 YYYY/MM/DD（年/月/日）
 
+- 2020/05/31　Ver 1.2.0：JavaScriptからTypeScriptへ移行
 - 2020/02/18　Ver 1.1.5：開始と終了のUIをわかりやすく
 - 2020/02/16　Ver 1.1.4：UIの変更 ＆ 再起動処理の変更 ＆ Chrome問題対処 ＆ 信頼度表示ありの文字数制限変更
 - 2020/02/10　Ver 1.1.3：リロードするまで認識結果を保持するように変更

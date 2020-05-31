@@ -7,6 +7,15 @@ Speech Recognition Telop for Japanese broadcasting
 日本人の方は[こちらから日本語版](./README.md)をお読みください。
 
 
+## Overview
+
+This is a client app generating a telop in real time for broadcasting. This app does only display and record results of speech recognition, and does not recognize speech. The speech recognition processing is left to outside cloud services.
+
+The telop is displayed on a green background, you can be transparent by XSplit Broadcaster or OBS Studio.
+
+You can record results of speech recognition with time stamp (experimental). You can use when editing videos after broadcasting, or when taking videos.
+
+
 ## Cautions
 
 - Now using Web Speech API, only works on Chromium-based browsers.
@@ -19,20 +28,12 @@ Speech Recognition Telop for Japanese broadcasting
 - If you deploy on a HTTP site, this app doesn’t work. Please deploy on a HTTPS site.
 
 
-## Overview
-
-This is a client app generating a telop in real time for broadcasting. This app does only display and record results of speech recognition, and does not recognize speech. The speech recognition processing is left to outside cloud services.
-
-The telop is displayed on a green background, you can be transparent by XSplit Broadcaster or OBS Studio.
-
-You can record results of speech recognition with time stamp (experimental). You can use when editing videos after broadcasting, or when taking videos.
-
-
 ## Trial
 
-This app used in SKA’s niconico Live（SKA’s community　[co2335074](https://com.nicovideo.jp/community/co2335074)）.
+Trial here → [speech-recognition-telop/index.html](https://skasapp.github.io/speech-recognition-telop/index.html)  
+※ This link will be changed in a several months.
 
-If you try, please “[click here](https://skasapp.github.io/speech-recognition-telop/index.html)”. But this link will be changed in a several months.
+This app used in SKA’s niconico Live（SKA’s community　[co2335074](https://com.nicovideo.jp/community/co2335074)）.
 
 
 ## Recording Format
@@ -66,19 +67,22 @@ Recording format is a JSON such as the next. But I changed the value to the expl
 
 I think that this app run stable up to Ver 1.1.4. I will add original functions.
 
-- not only Web Speech API, supporting Azure (merit of accuracy, license, and punctuation).
+- To unvisible after a certain time.
+- To display a whole sentence (to deal with the problem of only displaying the part you’re talking about right now)
 - not only client side, adding server side
 	- after processing of results of speech recognition
 		- inserting kuten (ending symbol like period)
 		- correcting interjection, for example, “etto” (means “well …”) is recognized “8” or “a to”
 	- more convenient record function, for exaple, keyword extraction
 	- generating SRT and WebVTT subtitles
+- not only Web Speech API, supporting Azure (merit of accuracy, license, and punctuation).
 
 
 ## Change Log
 
 YYYY/MM/DD（Year/Month/Date）
 
+- 2020/05/31　Ver.1.2.0：JavaScript to TypeScript
 - 2020/02/18　Ver 1.1.5：made the UI of start and end easier to understand
 - 2020/02/16　Ver 1.1.4：changed UI ＆ changed restart process ＆ dealed with problem of Chrome ＆ changed restriction of number of characters
 - 2020/02/10　Ver 1.1.3：keep results until reload
