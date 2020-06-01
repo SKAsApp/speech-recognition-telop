@@ -88,10 +88,21 @@ Recording format is a JSON such as the next. But I changed the value to the expl
 It is not upgrading from 1.x to 2.x to 3.x, they are developed independently as different functions. Please be careful with the version number.
 
 
+## Links
+
+SKA’s Links
+
+- niconico community：[co2335074](https://com.nicovideo.jp/community/co2335074)
+- YouTube channel：[https://youtube.com/c/0150159SK](https://youtube.com/c/0150159SK)
+- blomaga：[ar1739328](https://ch.nicovideo.jp/skas-web/blomaga/ar1739328)
+- Twitter：[@SK_Animation](https://twitter.com/SK_Animation)
+
+
 ## Change Log
 
 YYYY/MM/DD（Year/Month/Date）
 
+- 2020/06/01　Ver 1.3.1：fixed a problem the height of viewport was not enough on Windows
 - 2020/06/01　Ver 1.3.0：changed to display two lines ＆ changed display method when overflowing number of charactors ＆ fixed a problem of only displaying a few words
 - 2020/05/31　Ver.1.2.0：JavaScript to TypeScript
 - 2020/02/18　Ver 1.1.5：made the UI of start and end easier to understand
@@ -106,13 +117,3 @@ YYYY/MM/DD（Year/Month/Date）
 - 2020/02/08　Ver 1.0.0：you can choose display confidence or not
 - 2020/02/07　Ver 0.1.0：first version (but used from 2019/08/31)
 - 2020/02/07　Ver 0.0.0：creating this repository
-
-
-## Links
-
-SKA’s Links
-
-- niconico community：[co2335074](https://com.nicovideo.jp/community/co2335074)
-- YouTube channel：[https://youtube.com/c/0150159SK](https://youtube.com/c/0150159SK)
-- blomaga：[ar1739328](https://ch.nicovideo.jp/skas-web/blomaga/ar1739328)
-- Twitter：[@SK_Animation](https://twitter.com/SK_Animation)

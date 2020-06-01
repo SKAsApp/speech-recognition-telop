@@ -88,10 +88,21 @@ SKAのニコ生（SKA’s community　[co2335074](https://com.nicovideo.jp/commu
 1系→2系→3系とバージョンアップするのではなく，それぞれ別の機能で，独立に開発しています。バージョン番号には気をつけてください。
 
 
+## リンク集
+
+SKAの関連ページ
+
+- ニコニコミュ：[co2335074](https://com.nicovideo.jp/community/co2335074)
+- YouTubeチャンネル：[https://youtube.com/c/0150159SK](https://youtube.com/c/0150159SK)
+- ブロマガ：[ar1739328](https://ch.nicovideo.jp/skas-web/blomaga/ar1739328)
+- Twitter：[@SK_Animation](https://twitter.com/SK_Animation)
+
+
 ## 更新履歴
 
 YYYY/MM/DD（年/月/日）
 
+- 2020/06/01　Ver 1.3.1：Windowsで表示領域の高さが足りなかった問題の対処
 - 2020/06/01　Ver 1.3.0：2行表示へ変更 ＆ 最大文字数超えた場合の表示方法の変更 ＆ 今まさに話している数単語しか表示されない問題の対処
 - 2020/05/31　Ver 1.2.0：JavaScriptからTypeScriptへ移行
 - 2020/02/18　Ver 1.1.5：開始と終了のUIをわかりやすく
@@ -106,13 +117,3 @@ YYYY/MM/DD（年/月/日）
 - 2020/02/08　Ver 1.0.0：信頼度表示のあり／なし選択
 - 2020/02/07　Ver 0.1.0：初版（実質2019/08/31時点のもの）
 - 2020/02/07　Ver 0.0.0：リポジトリ作成
-
-
-## リンク集
-
-SKAの関連ページ
-
-- ニコニコミュ：[co2335074](https://com.nicovideo.jp/community/co2335074)
-- YouTubeチャンネル：[https://youtube.com/c/0150159SK](https://youtube.com/c/0150159SK)
-- ブロマガ：[ar1739328](https://ch.nicovideo.jp/skas-web/blomaga/ar1739328)
-- Twitter：[@SK_Animation](https://twitter.com/SK_Animation)
