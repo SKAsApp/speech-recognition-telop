@@ -23,7 +23,7 @@ You can record results of speech recognition with time stamp (experimental). You
 - This app developer takes no responsibility for damages caused by using this app.
 - There are restrictions of time depending on a browser (API).
 - You can use the source code of this app (display and record function) for commercial purpose within GPL-3.0, but please check your browser to use speech recognition commercially.
-	- If you use Chromium + Speech API (private API), DO NOT use commercially. not allowed.
+	- If you use Chromium + Speech API (limited access API), DO NOT use commercially. not allowed.
 	- If you use Google Chrome, I DO NOT recommend using commercially.
 - If you deploy on a HTTP site, this app doesn’t work. Please deploy on a HTTPS site.
 
