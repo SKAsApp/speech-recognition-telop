@@ -68,7 +68,10 @@ Recording format is a JSON such as the next. But I changed the value to the expl
 1.x are going to be developed only minor fixes after 1.4, and I will develop 2.x.
 
 - 1.x：Web client to display telop
-	- 1.4：make telop invisible after a certain period of time
+	- Ver 1.4
+		- make telop invisible after a certain period of time
+		- you can select background color (β：this function support after 2.x)
+		- Virtual YouTuber mode (β)
 - 2.x：Adds advanced and useful server side features
 	- after processing of results of speech recognition
 		- inserting kuten (ending symbol like period)
@@ -80,6 +83,7 @@ Recording format is a JSON such as the next. But I changed the value to the expl
 	- Virtual Cast VCI
 - Others
 	- not only Web Speech API, supporting Azure (merit of accuracy, license, and punctuation).
+	- real time translation
 
 It is not upgrading from 1.x to 2.x to 3.x, they are developed independently as different functions. Please be careful with the version number.
 
