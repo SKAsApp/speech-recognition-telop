@@ -65,23 +65,30 @@ Recording format is a JSON such as the next. But I changed the value to the expl
 
 ## Future Plans
 
-I think that this app run stable up to Ver 1.1.4. I will add original functions.
+1.x are going to be developed only minor fixes after 1.4, and I will develop 2.x.
 
-- To unvisible after a certain time.
-- To display a whole sentence (to deal with the problem of only displaying the part you’re talking about right now)
-- not only client side, adding server side
+- 1.x：Web client to display telop
+	- 1.4：make telop invisible after a certain period of time
+- 2.x：Adds advanced and useful server side features
 	- after processing of results of speech recognition
 		- inserting kuten (ending symbol like period)
 		- correcting interjection, for example, “etto” (means “well …”) is recognized “8” or “a to”
 	- more convenient record function, for exaple, keyword extraction
 	- generating SRT and WebVTT subtitles
-- not only Web Speech API, supporting Azure (merit of accuracy, license, and punctuation).
+- 3.x：Desktop app easier to use
+	- macOS ＆ Windows standalone app
+	- Virtual Cast VCI
+- Others
+	- not only Web Speech API, supporting Azure (merit of accuracy, license, and punctuation).
+
+It is not upgrading from 1.x to 2.x to 3.x, they are developed independently as different functions. Please be careful with the version number.
 
 
 ## Change Log
 
 YYYY/MM/DD（Year/Month/Date）
 
+- 2020/06/01　Ver 1.3.0：changed to display two lines ＆ changed display method when overflowing number of charactors ＆ fixed a problem of only displaying a few words
 - 2020/05/31　Ver.1.2.0：JavaScript to TypeScript
 - 2020/02/18　Ver 1.1.5：made the UI of start and end easier to understand
 - 2020/02/16　Ver 1.1.4：changed UI ＆ changed restart process ＆ dealed with problem of Chrome ＆ changed restriction of number of characters

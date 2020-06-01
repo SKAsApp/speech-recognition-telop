@@ -20,12 +20,23 @@ let previousLog: Array<object> = [ ];
 let transcript: string = "";
 let confidence: number = 0.0;
 
+export interface SpeechRecognitionErrorEvent extends Event
+{
+	error: any;
+	message: string;
+}
+
 export interface IWindow extends Window
 {
 	webkitSpeechRecognition: any;
+	webkitSpeechRecognitionEvent: any;
+	webkitSpeechRecognitionResultList: any;
 }
-const {webkitSpeechRecognition}: IWindow = <IWindow> <unknown> window;
-window.SpeechRecognition = webkitSpeechRecognition || window.SpeechRecognition;
+const {webkitSpeechRecognition, webkitSpeechRecognitionEvent, webkitSpeechRecognitionResultList}: IWindow = <IWindow> <unknown> window;
+window.SpeechRecognition = window.SpeechRecognition || webkitSpeechRecognition;
+window.SpeechRecognitionEvent = window.SpeechRecognitionEvent || webkitSpeechRecognitionEvent;
+window.SpeechRecognitionResultList = window.SpeechRecognitionResultList || webkitSpeechRecognitionResultList;
+
 if (!("SpeechRecognition" in window))
 {
 	window.alert("ご利用のブラウザーは音声認識に対応していません。\r\n制限なく利用するためには Google Chrome をお使いください。");
@@ -65,7 +76,7 @@ document.addEventListener("DOMContentLoaded", ( ) =>
 }, false);
 
 
-function speechRecognition( )
+const speechRecognition = ( ) =>
 {
 	initialize( );
 	setEventHandler( );
@@ -74,7 +85,7 @@ function speechRecognition( )
 }
 
 // 初期化処理
-function initialize( )
+const initialize= ( ) =>
 {
 	console.log("インスタンス生成しました。");
 	recognition = new SpeechRecognition( );
@@ -84,16 +95,16 @@ function initialize( )
 	recognition.maxAlternatives = 1;
 }
 
-function setEventHandler( )
+const setEventHandler = ( ) =>
 {
 	// エラーだったら
-	recognition.onerror = (error: Event) => 
+	recognition.onerror = (event: SpeechRecognitionErrorEvent) => 
 	{
-		console.log("エラーが発生しました。" + String(error) + "　speaking：" + String(speaking) + "　stopButtonPushed：" + String(buttonStopPushed));
+		console.log("エラーが発生しました。" + String(event.error) + "　speaking：" + String(speaking) + "　stopButtonPushed：" + String(buttonStopPushed));
 	};
 
 	// 接続が切れたら
-	recognition.onend = (event) => 
+	recognition.onend = (event: SpeechRecognitionErrorEvent) => 
 	{
 		console.log("接続が切れました。" + "　speaking：" + String(speaking) + "　stopButtonPushed：" + String(buttonStopPushed));
 		if (!speaking && !buttonStopPushed)
@@ -111,35 +122,39 @@ function setEventHandler( )
 	};
 
 	// 音が途切れたら
-	recognition.onsoundend = (event) => 
+	recognition.onsoundend = (event: SpeechRecognitionErrorEvent) => 
 	{
 		
 	};
 
 	// 認識できなかったら
-	recognition.onnomatch = (event) => 
+	recognition.onnomatch = (event: SpeechRecognitionEvent) => 
 	{
 		console.log("認識できませんでした。");
 	};
 
 	// 認識したら
-	recognition.onresult = (event) => 
+	recognition.onresult = (event: SpeechRecognitionEvent) => 
 	{
 		// 結果取得
 		transcript = event.results[event.results.length - 1][0].transcript;
-		let response: string = transcript.slice(-111);
+		if(0 < event.results.length - 1 && !event.results[event.results.length - 2].isFinal)
+		{
+			transcript = event.results[event.results.length - 2][0].transcript + event.results[event.results.length - 1][0].transcript;
+		}
+		let response: string = transcript;
 		confidence = event.results[event.results.length - 1][0].confidence;
 		if (confidenceMode)
 		{
 			const confidenceString: string = confidence.toString( ).slice(0, 5);
-			response = (transcript + '<span class="confidence"> （' + confidenceString + '）</span>').slice(-147);
+			response = transcript + '<span class="confidence"> （' + confidenceString + '）</span>';
 		}
 		// 描画
 		render(response, false);
 		// 認識確定してたら
 		if (event.results[event.results.length - 1].isFinal)
 		{
-			console.log("確定。");
+			console.log((event.results.length - 1).toString( ) + "：確定。");
 			speaking = false;
 			simplyRecord(transcript, confidence);
 			return;
@@ -149,7 +164,7 @@ function setEventHandler( )
 }
 
 // 描画
-function render(string, isSystemMessage)
+const render = (string: string, isSystemMessage: boolean) =>
 {
 	if (isSystemMessage)
 	{
@@ -159,21 +174,21 @@ function render(string, isSystemMessage)
 	renderSubtitle(string);
 }
 
-function renderSubtitle(string)
+const renderSubtitle = (string: string) =>
 {
 	subtitle.textContent = "";
 	subtitle.insertAdjacentHTML("afterbegin", string);
 }
 
 // 簡易保存機能（のちほどサーバーサイドに移行し，高度な機能もつける予定）
-function simplyRecord(rtranscript, rconfidence)
+const simplyRecord = (rtranscript: string, rconfidence: number) =>
 {
 	if (startTime == null)
 	{
 		return;
 	}
-	console.log("記録。")
 	rid += 1;
+	console.log(rid.toString( ) + "：記録。");
 	const now: Date = new Date( );
 	const timeDiff: Date = new Date(now.getTime( ) - startTime.getTime( ));
 	const log = {
@@ -198,7 +213,7 @@ function simplyRecord(rtranscript, rconfidence)
 }
 
 // 言語選択変わったら
-function changeLanguage( )
+const changeLanguage = ( ) =>
 {
 	language = languageSelector.value;
 	if (recognition != null)
@@ -208,7 +223,7 @@ function changeLanguage( )
 }
 
 // 開始ボタン押したら
-function recognitionStartClick( )
+const recognitionStartClick = ( ) =>
 {
 	if (startTime == null)
 	{
@@ -222,7 +237,7 @@ function recognitionStartClick( )
 }
 
 // 終了ボタン押したら
-function recognitionStopClick( )
+const recognitionStopClick = ( ) =>
 {
 	buttonStopPushed = true;
 	buttonStop.disabled = true;
@@ -231,7 +246,7 @@ function recognitionStopClick( )
 }
 
 // 保存ボタン押したら
-function getJson( )
+const getJson = ( ) =>
 {
 	if (startTime == null)
 	{
@@ -248,24 +263,24 @@ function getJson( )
 }
 
 // 信頼度表示変更
-function setConfidenceMode(mode)
+const setConfidenceMode = (mode: boolean) =>
 {
 	confidenceMode = mode;
 }
 
 // 開始・終了関係
-function recognitionStart( )
+const recognitionStart = ( ) =>
 {
 	speaking = false;
 	recognition.start( );
 }
 
-function recognitionStop( )
+const recognitionStop = ( ) =>
 {
 	recognition.stop( );
 }
 
-function restart( )
+const restart = ( ) =>
 {
 	console.log("再起動。");
 	recognitionStop( );

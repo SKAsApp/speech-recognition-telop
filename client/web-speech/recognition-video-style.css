@@ -39,8 +39,10 @@ div.subtitle-box
 	margin-left: auto;
 	margin-right: auto;
 	width: 1190px;
-	height: 164px;
+	height: 110px;
+	/*height: 164px;*/
 	background-color: #00ff00;
+	overflow: hidden;
 }
 
 p#subtitle
@@ -52,6 +54,8 @@ p#subtitle
 	margin-left: auto;
 	margin-right: auto;
 	text-align: center;
+	overflow: hidden;
+	text-overflow: "";
 	font-family: "游ゴシック", "YuGothic", "Yu Gothic", sans-serif;
 	font-weight: 700;
 	line-height: normal;

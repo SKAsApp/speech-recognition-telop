@@ -18,8 +18,10 @@ let rid = -1;
 let previousLog = [];
 let transcript = "";
 let confidence = 0.0;
-const { webkitSpeechRecognition } = window;
-window.SpeechRecognition = webkitSpeechRecognition || window.SpeechRecognition;
+const { webkitSpeechRecognition, webkitSpeechRecognitionEvent, webkitSpeechRecognitionResultList } = window;
+window.SpeechRecognition = window.SpeechRecognition || webkitSpeechRecognition;
+window.SpeechRecognitionEvent = window.SpeechRecognitionEvent || webkitSpeechRecognitionEvent;
+window.SpeechRecognitionResultList = window.SpeechRecognitionResultList || webkitSpeechRecognitionResultList;
 if (!("SpeechRecognition" in window)) {
     window.alert("ご利用のブラウザーは音声認識に対応していません。\r\n制限なく利用するためには Google Chrome をお使いください。");
 }
@@ -50,25 +52,25 @@ document.addEventListener("DOMContentLoaded", () => {
         changeLanguage();
     }, false);
 }, false);
-function speechRecognition() {
+const speechRecognition = () => {
     initialize();
     setEventHandler();
     speaking = false;
     recognition.start();
-}
+};
 // 初期化処理
-function initialize() {
+const initialize = () => {
     console.log("インスタンス生成しました。");
     recognition = new SpeechRecognition();
     recognition.lang = language;
     recognition.continuous = true;
     recognition.interimResults = true;
     recognition.maxAlternatives = 1;
-}
-function setEventHandler() {
+};
+const setEventHandler = () => {
     // エラーだったら
-    recognition.onerror = (error) => {
-        console.log("エラーが発生しました。" + String(error) + "　speaking：" + String(speaking) + "　stopButtonPushed：" + String(buttonStopPushed));
+    recognition.onerror = (event) => {
+        console.log("エラーが発生しました。" + String(event.error) + "　speaking：" + String(speaking) + "　stopButtonPushed：" + String(buttonStopPushed));
     };
     // 接続が切れたら
     recognition.onend = (event) => {
@@ -95,43 +97,46 @@ function setEventHandler() {
     recognition.onresult = (event) => {
         // 結果取得
         transcript = event.results[event.results.length - 1][0].transcript;
-        let response = transcript.slice(-111);
+        if (0 < event.results.length - 1 && !event.results[event.results.length - 2].isFinal) {
+            transcript = event.results[event.results.length - 2][0].transcript + event.results[event.results.length - 1][0].transcript;
+        }
+        let response = transcript;
         confidence = event.results[event.results.length - 1][0].confidence;
         if (confidenceMode) {
             const confidenceString = confidence.toString().slice(0, 5);
-            response = (transcript + '<span class="confidence"> （' + confidenceString + '）</span>').slice(-147);
+            response = transcript + '<span class="confidence"> （' + confidenceString + '）</span>';
         }
         // 描画
         render(response, false);
         // 認識確定してたら
         if (event.results[event.results.length - 1].isFinal) {
-            console.log("確定。");
+            console.log((event.results.length - 1).toString() + "：確定。");
             speaking = false;
             simplyRecord(transcript, confidence);
             return;
         }
         speaking = true;
     };
-}
+};
 // 描画
-function render(string, isSystemMessage) {
+const render = (string, isSystemMessage) => {
     if (isSystemMessage) {
         renderSubtitle('<span class="system">' + string + '</span>');
         return;
     }
     renderSubtitle(string);
-}
-function renderSubtitle(string) {
+};
+const renderSubtitle = (string) => {
     subtitle.textContent = "";
     subtitle.insertAdjacentHTML("afterbegin", string);
-}
+};
 // 簡易保存機能（のちほどサーバーサイドに移行し，高度な機能もつける予定）
-function simplyRecord(rtranscript, rconfidence) {
+const simplyRecord = (rtranscript, rconfidence) => {
     if (startTime == null) {
         return;
     }
-    console.log("記録。");
     rid += 1;
+    console.log(rid.toString() + "：記録。");
     const now = new Date();
     const timeDiff = new Date(now.getTime() - startTime.getTime());
     const log = {
@@ -151,16 +156,16 @@ function simplyRecord(rtranscript, rconfidence) {
         confidence: rconfidence
     };
     previousLog.push(log);
-}
+};
 // 言語選択変わったら
-function changeLanguage() {
+const changeLanguage = () => {
     language = languageSelector.value;
     if (recognition != null) {
         recognition.lang = language;
     }
-}
+};
 // 開始ボタン押したら
-function recognitionStartClick() {
+const recognitionStartClick = () => {
     if (startTime == null) {
         previousLog = [];
         startTime = new Date();
@@ -169,16 +174,16 @@ function recognitionStartClick() {
     buttonStart.disabled = true;
     buttonStop.disabled = false;
     recognitionStart();
-}
+};
 // 終了ボタン押したら
-function recognitionStopClick() {
+const recognitionStopClick = () => {
     buttonStopPushed = true;
     buttonStop.disabled = true;
     buttonStart.disabled = false;
     recognitionStop();
-}
+};
 // 保存ボタン押したら
-function getJson() {
+const getJson = () => {
     if (startTime == null) {
         return;
     }
@@ -190,21 +195,21 @@ function getJson() {
     link.href = url;
     link.download = "音声認識テロップ " + String(startTime.getFullYear()) + "-" + ("00" + String(Number(startTime.getMonth() + 1))).slice(-2) + "-" + ("00" + String(startTime.getDate())).slice(-2) + ".json";
     link.click();
-}
+};
 // 信頼度表示変更
-function setConfidenceMode(mode) {
+const setConfidenceMode = (mode) => {
     confidenceMode = mode;
-}
+};
 // 開始・終了関係
-function recognitionStart() {
+const recognitionStart = () => {
     speaking = false;
     recognition.start();
-}
-function recognitionStop() {
+};
+const recognitionStop = () => {
     recognition.stop();
-}
-function restart() {
+};
+const restart = () => {
     console.log("再起動。");
     recognitionStop();
     recognitionStart();
-}
+};
