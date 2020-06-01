@@ -80,7 +80,6 @@ SKAのニコ生（SKA’s community　[co2335074](https://com.nicovideo.jp/commu
 	- SRTおよびWebVTT形式での字幕出力
 - 3系：より簡単に使えるデスクトップアプリ
 	- macOS ＆ Windows
-	- バーチャルキャストVCI
 - その他
 	- Web Speech APIだけでなく，Azureへの対応（高精度化＆ライセンス問題回避＆句読点挿入のため）
 	- リアルタイム翻訳

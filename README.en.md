@@ -79,8 +79,7 @@ Recording format is a JSON such as the next. But I changed the value to the expl
 	- more convenient record function, for exaple, keyword extraction
 	- generating SRT and WebVTT subtitles
 - 3.x：Desktop app easier to use
-	- macOS ＆ Windows standalone app
-	- Virtual Cast VCI
+	- macOS ＆ Windows app
 - Others
 	- not only Web Speech API, supporting Azure (merit of accuracy, license, and punctuation).
 	- real time translation
