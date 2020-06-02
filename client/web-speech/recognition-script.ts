@@ -4,7 +4,7 @@
 
 // 初期処理
 let agent: string = window.navigator.userAgent;
-let subtitle: HTMLElement;
+let subtitle: HTMLParagraphElement;
 let languageSelector: HTMLInputElement;
 let buttonStart: HTMLButtonElement;
 let buttonStop: HTMLButtonElement;
@@ -12,9 +12,9 @@ let buttonSave: HTMLButtonElement;
 let language: string = "ja-JP";
 let speaking: boolean = false;
 let buttonStopPushed: boolean = false;
-let recognition: SpeechRecognition = null;
+let recognition: SpeechRecognition;
 let confidenceMode: boolean = false;
-let startTime: Date = null;
+let startTime: Date;
 let rid: number = -1;
 let previousLog: Array<object> = [ ];
 let transcript: string = "";
@@ -32,6 +32,7 @@ export interface IWindow extends Window
 	webkitSpeechRecognitionEvent: any;
 	webkitSpeechRecognitionResultList: any;
 }
+
 const {webkitSpeechRecognition, webkitSpeechRecognitionEvent, webkitSpeechRecognitionResultList}: IWindow = <IWindow> <unknown> window;
 window.SpeechRecognition = window.SpeechRecognition || webkitSpeechRecognition;
 window.SpeechRecognitionEvent = window.SpeechRecognitionEvent || webkitSpeechRecognitionEvent;
@@ -51,7 +52,7 @@ document.addEventListener("DOMContentLoaded", ( ) =>
 {
 	initialize( );
 	setEventHandler( );
-	subtitle = document.getElementById("subtitle");
+	subtitle = <HTMLParagraphElement> document.getElementById("subtitle");
 	buttonStart = <HTMLButtonElement> document.getElementById("button-start");
 	buttonStop = <HTMLButtonElement> document.getElementById("button-stop");
 	buttonSave = <HTMLButtonElement> document.getElementById("button-save");
@@ -122,10 +123,10 @@ const setEventHandler = ( ) =>
 	};
 
 	// 音が途切れたら
-	recognition.onsoundend = (event: SpeechRecognitionErrorEvent) => 
-	{
-		
-	};
+	// recognition.onsoundend = (event: SpeechRecognitionErrorEvent) => 
+	// {
+	// 	
+	// };
 
 	// 認識できなかったら
 	recognition.onnomatch = (event: SpeechRecognitionEvent) => 
@@ -138,7 +139,7 @@ const setEventHandler = ( ) =>
 	{
 		// 結果取得
 		transcript = event.results[event.results.length - 1][0].transcript;
-		if(0 < event.results.length - 1 && !event.results[event.results.length - 2].isFinal)
+		if (0 < event.results.length - 1 && !event.results[event.results.length - 2].isFinal)
 		{
 			transcript = event.results[event.results.length - 2][0].transcript + event.results[event.results.length - 1][0].transcript;
 		}
@@ -157,6 +158,7 @@ const setEventHandler = ( ) =>
 			console.log((event.results.length - 1).toString( ) + "：確定。");
 			speaking = false;
 			simplyRecord(transcript, confidence);
+			setTimeout(hideSubtitle, 15000, transcript);
 			return;
 		}
 		speaking = true;
@@ -178,6 +180,15 @@ const renderSubtitle = (string: string) =>
 {
 	subtitle.textContent = "";
 	subtitle.insertAdjacentHTML("afterbegin", string);
+}
+
+const hideSubtitle = (previousTranscript: string) =>
+{
+	if (previousTranscript == transcript)
+	{
+		render("", false);
+		console.log("非表示。");
+	}
 }
 
 // 簡易保存機能（のちほどサーバーサイドに移行し，高度な機能もつける予定）

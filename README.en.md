@@ -101,6 +101,7 @@ SKA’s Links
 
 YYYY/MM/DD（Year/Month/Date）
 
+- 2020/06/03　Ver 1.4.0：make telop invisible after 15 seconds ＆ add translation（α）
 - 2020/06/01　Ver 1.3.1：fixed a problem the height of viewport was not enough on Windows
 - 2020/06/01　Ver 1.3.0：changed to display two lines ＆ changed display method when overflowing number of charactors ＆ fixed a problem of only displaying a few words
 - 2020/05/31　Ver.1.2.0：JavaScript to TypeScript

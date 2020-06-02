@@ -11,9 +11,9 @@ let buttonSave;
 let language = "ja-JP";
 let speaking = false;
 let buttonStopPushed = false;
-let recognition = null;
+let recognition;
 let confidenceMode = false;
-let startTime = null;
+let startTime;
 let rid = -1;
 let previousLog = [];
 let transcript = "";
@@ -87,8 +87,10 @@ const setEventHandler = () => {
         recognitionStop();
     };
     // 音が途切れたら
-    recognition.onsoundend = (event) => {
-    };
+    // recognition.onsoundend = (event: SpeechRecognitionErrorEvent) => 
+    // {
+    // 	
+    // };
     // 認識できなかったら
     recognition.onnomatch = (event) => {
         console.log("認識できませんでした。");
@@ -113,6 +115,7 @@ const setEventHandler = () => {
             console.log((event.results.length - 1).toString() + "：確定。");
             speaking = false;
             simplyRecord(transcript, confidence);
+            setTimeout(hideSubtitle, 15000, transcript);
             return;
         }
         speaking = true;
@@ -129,6 +132,12 @@ const render = (string, isSystemMessage) => {
 const renderSubtitle = (string) => {
     subtitle.textContent = "";
     subtitle.insertAdjacentHTML("afterbegin", string);
+};
+const hideSubtitle = (previousTranscript) => {
+    if (previousTranscript == transcript) {
+        render("", false);
+        console.log("非表示。");
+    }
 };
 // 簡易保存機能（のちほどサーバーサイドに移行し，高度な機能もつける予定）
 const simplyRecord = (rtranscript, rconfidence) => {
