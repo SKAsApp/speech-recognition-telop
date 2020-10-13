@@ -1,11 +1,10 @@
 /*!
  * Copyright 2020 SKA
  */
-// ※ 音声認識翻訳（α）用。αのため，recognition-script.tsとほぼ同じコードですが，ファイルを分けています。（β）の頃にはいい感じにソース管理されてると思います。
+// ※ 音声認識合成（α）用。αのため，recognition-script.tsとほぼ同じコードですが，ファイルを分けています。（β）の頃にはいい感じにソース管理されてると思います。
 // 初期処理
 let agent = window.navigator.userAgent;
 let subtitle;
-let translation;
 let languageSelector;
 let buttonStart;
 let buttonStop;
@@ -22,7 +21,7 @@ let previousLog = [];
 let transcript = "";
 let confidence = 0.0;
 let resultCounter = 0;
-let translateApiUrl = "";
+const synthApiUrl = "http://127.0.0.1:50080/talk";
 let previousTranslatingString = "";
 let previousTranslatedString = "";
 const { webkitSpeechRecognition, webkitSpeechRecognitionEvent, webkitSpeechRecognitionResultList } = window;
@@ -41,7 +40,6 @@ document.addEventListener("DOMContentLoaded", () => {
     initialize();
     setEventHandler();
     subtitle = document.getElementById("subtitle");
-    translation = document.getElementById("translation");
     buttonStart = document.getElementById("button-start");
     buttonStop = document.getElementById("button-stop");
     buttonSave = document.getElementById("button-save");
@@ -59,17 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
     languageSelector.addEventListener("change", (event) => {
         changeLanguage();
     }, false);
-    setTranslateApiUrl();
 }, false);
-const setTranslateApiUrl = () => {
-    const tempUrl = prompt("翻訳URLを入力してください。");
-    if (tempUrl == null || !tempUrl.startsWith("https://script.google.com/macros/") || !tempUrl.endsWith("/exec")) {
-        alert("入力が間違っています。\r\nもう1度入力するにはページを再読み込みしてください。");
-        buttonStart.disabled = true;
-        return;
-    }
-    translateApiUrl = tempUrl;
-};
 const speechRecognition = () => {
     initialize();
     setEventHandler();
@@ -136,12 +124,11 @@ const setEventHandler = () => {
         }
         let response = transcript;
         confidence = event.results[event.results.length - 1][0].confidence;
-        // 翻訳→描画
+        // 描画→合成
         render(response, false, 1);
-        const translateFlag = manageResultCounter(event.results[event.results.length - 1].isFinal);
-        if (translateFlag) {
-            response = await translate(response);
-            render(response, false, 2);
+        const synthFlag = manageResultCounter(event.results[event.results.length - 1].isFinal);
+        if (synthFlag) {
+            await synth(response);
         }
         // 認識確定してたら
         if (event.results[event.results.length - 1].isFinal) {
@@ -156,34 +143,35 @@ const setEventHandler = () => {
 };
 const manageResultCounter = (isFinal) => {
     resultCounter += 1;
-    if (isFinal || resultCounter == 8) {
+    // 1/nのn
+    if (!isFinal && resultCounter == 2) {
         resultCounter = 0;
     }
     return resultCounter == 0;
 };
-const translate = async (beforeString) => {
-    if (beforeString == previousTranslatingString) {
-        return previousTranslatedString;
+const synth = async (tempString) => {
+    if (tempString == previousTranslatingString) {
+        return;
     }
-    previousTranslatingString = beforeString;
+    const previousLength = previousTranslatingString.length;
+    const tempLength = tempString.length;
+    if (previousLength == tempLength) {
+        return;
+    }
+    const beforeString = tempString.slice(previousLength, tempLength).replace(" ", "%20");
+    previousTranslatingString = tempString;
     let translatedString = "";
     try {
-        await fetch(translateApiUrl + "?text=" + encodeURIStrictly(beforeString) + "&source=" + encodeURIStrictly(language) + "&target=" + encodeURIStrictly(translateLanguage))
-            .then((response) => {
-            return response.text();
-        })
-            .then((text) => {
-            translatedString = text;
-        });
+        await fetch(synthApiUrl + "?text=" + beforeString);
     }
     catch (error) {
-        console.log("翻訳リクエストに失敗しました。詳細：" + error.toString());
+        console.log("音声合成に失敗しました。詳細：" + error.toString());
     }
     previousTranslatedString = translatedString;
-    return translatedString;
+    return;
 };
 // 描画
-// renderer＝0：両方描画，renderer＝1：元言語描画，renderer＝2：翻訳描画
+// renderer＝0：両方描画，renderer＝1：元言語描画
 const render = (string, isSystemMessage, renderer) => {
     if (isSystemMessage) {
         renderSubtitle('<span class="system">' + string + '</span>');
@@ -193,20 +181,11 @@ const render = (string, isSystemMessage, renderer) => {
         renderSubtitle(string);
         return;
     }
-    if (renderer == 2) {
-        renderTranslation(string);
-        return;
-    }
     renderSubtitle(string);
-    renderTranslation(string);
 };
 const renderSubtitle = (string) => {
     subtitle.textContent = "";
     subtitle.insertAdjacentHTML("afterbegin", string);
-};
-const renderTranslation = (string) => {
-    translation.textContent = "";
-    translation.insertAdjacentHTML("afterbegin", string);
 };
 const hideSubtitle = (previousTranscript) => {
     if (previousTranscript == transcript) {

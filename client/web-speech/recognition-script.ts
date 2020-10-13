@@ -105,9 +105,9 @@ const setEventHandler = ( ) =>
 	};
 
 	// 接続が切れたら
-	recognition.onend = (event: SpeechRecognitionErrorEvent) => 
+	recognition.onend = (event: Event) => 
 	{
-		console.log("接続が切れました。" + "　speaking：" + String(speaking) + "　stopButtonPushed：" + String(buttonStopPushed));
+		console.log("end：ブラウザーが音声捕捉終了\r\n接続が切れました。" + "　speaking：" + String(speaking) + "　stopButtonPushed：" + String(buttonStopPushed));
 		if (!speaking && !buttonStopPushed)
 		{
 			restart( );
@@ -122,16 +122,41 @@ const setEventHandler = ( ) =>
 		recognitionStop( );
 	};
 
-	// 音が途切れたら
-	// recognition.onsoundend = (event: SpeechRecognitionErrorEvent) => 
-	// {
-	// 	
-	// };
-
 	// 認識できなかったら
 	recognition.onnomatch = (event: SpeechRecognitionEvent) => 
 	{
 		console.log("認識できませんでした。");
+	};
+
+	// その他のイベントハンドラー
+	recognition.onaudiostart = (event: Event) => 
+	{
+		console.log("audio start：ブラウザーが音声捕捉");
+	};
+
+	recognition.onsoundstart = (event: Event) => 
+	{
+		console.log("sound start：なにか音が鳴った");
+	};
+
+	recognition.onsoundend = (event: Event) => 
+	{
+		console.log("sound end：音が止まった");
+	};
+
+	recognition.onspeechstart = (event: Event) => 
+	{
+		console.log("speech start：サービスが認識開始");
+	};
+
+	recognition.onspeechend = (event: Event) => 
+	{
+		console.log("speech end：サービスが認識終了");
+	};
+
+	recognition.onstart = (event: Event) => 
+	{
+		console.log("start：サービスが言語認識開始");
 	};
 
 	// 認識したら
@@ -158,7 +183,7 @@ const setEventHandler = ( ) =>
 			console.log((event.results.length - 1).toString( ) + "：確定。");
 			speaking = false;
 			simplyRecord(transcript, confidence);
-			setTimeout(hideSubtitle, 15000, transcript);
+			setTimeout(hideSubtitle, 10000, transcript);
 			return;
 		}
 		speaking = true;
@@ -269,7 +294,7 @@ const getJson = ( ) =>
 	const url: string = window.URL.createObjectURL(blob);
 	const link: HTMLAnchorElement = document.createElement("a");
 	link.href = url;
-	link.download = "音声認識テロップ " + String(startTime.getFullYear( )) + "-" + ("00" + String(Number(startTime.getMonth( ) + 1))).slice(-2) + "-" + ("00" + String(startTime.getDate( ))).slice(-2) + ".json";
+	link.download = String(startTime.getFullYear( )) + "-" + ("00" + String(Number(startTime.getMonth( ) + 1))).slice(-2) + "-" + ("00" + String(startTime.getDate( ))).slice(-2) + " 音声認識テロップ" + ".json";
 	link.click( );
 }
 

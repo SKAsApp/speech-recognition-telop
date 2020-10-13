@@ -2,12 +2,11 @@
  * Copyright 2020 SKA
  */
 
- // ※ 音声認識翻訳（α）用。αのため，recognition-script.tsとほぼ同じコードですが，ファイルを分けています。（β）の頃にはいい感じにソース管理されてると思います。
+ // ※ 音声認識合成（α）用。αのため，recognition-script.tsとほぼ同じコードですが，ファイルを分けています。（β）の頃にはいい感じにソース管理されてると思います。
 
 // 初期処理
 let agent: string = window.navigator.userAgent;
 let subtitle: HTMLParagraphElement;
-let translation: HTMLParagraphElement;
 let languageSelector: HTMLInputElement;
 let buttonStart: HTMLButtonElement;
 let buttonStop: HTMLButtonElement;
@@ -24,7 +23,7 @@ let previousLog: Array<object> = [ ];
 let transcript: string = "";
 let confidence: number = 0.0;
 let resultCounter: number = 0;
-let translateApiUrl: string = "";
+const synthApiUrl: string = "http://127.0.0.1:50080/talk";
 let previousTranslatingString: string = "";
 let previousTranslatedString: string = "";
 
@@ -61,7 +60,6 @@ document.addEventListener("DOMContentLoaded", ( ) =>
 	initialize( );
 	setEventHandler( );
 	subtitle = <HTMLParagraphElement> document.getElementById("subtitle");
-	translation = <HTMLParagraphElement> document.getElementById("translation");
 	buttonStart = <HTMLButtonElement> document.getElementById("button-start");
 	buttonStop = <HTMLButtonElement> document.getElementById("button-stop");
 	buttonSave = <HTMLButtonElement> document.getElementById("button-save");
@@ -83,20 +81,7 @@ document.addEventListener("DOMContentLoaded", ( ) =>
 	{
 		changeLanguage( );
 	}, false);
-	setTranslateApiUrl( );
 }, false);
-
-const setTranslateApiUrl = ( ) =>
-{
-	const tempUrl: string | null = prompt("翻訳URLを入力してください。");
-	if (tempUrl == null || !tempUrl.startsWith("https://script.google.com/macros/") || !tempUrl.endsWith("/exec"))
-	{
-		alert("入力が間違っています。\r\nもう1度入力するにはページを再読み込みしてください。");
-		buttonStart.disabled = true;
-		return;
-	}
-	translateApiUrl = tempUrl;
-};
 
 
 const speechRecognition = ( ) =>
@@ -192,13 +177,12 @@ const setEventHandler = ( ) =>
 		}
 		let response: string = transcript;
 		confidence = event.results[event.results.length - 1][0].confidence;
-		// 翻訳→描画
+		// 描画→合成
 		render(response, false, 1);
-		const translateFlag: boolean = manageResultCounter(event.results[event.results.length - 1].isFinal);
-		if (translateFlag)
+		const synthFlag: boolean = manageResultCounter(event.results[event.results.length - 1].isFinal);
+		if (synthFlag)
 		{
-			response = await translate(response);
-			render(response, false, 2);
+			await synth(response);
 		}
 		// 認識確定してたら
 		if (event.results[event.results.length - 1].isFinal)
@@ -216,43 +200,43 @@ const setEventHandler = ( ) =>
 const manageResultCounter = (isFinal: boolean) =>
 {
 	resultCounter += 1;
-	if (isFinal || resultCounter == 8)
+	// 1/nのn
+	if (!isFinal && resultCounter == 2)
 	{
 		resultCounter = 0;
 	}
 	return resultCounter == 0;
 };
 
-const translate = async (beforeString: string) =>
+const synth = async (tempString: string) =>
 {
-	if (beforeString == previousTranslatingString)
+	if (tempString == previousTranslatingString)
 	{
-		return previousTranslatedString;
+		return;
 	}
-	previousTranslatingString = beforeString;
+	const previousLength = previousTranslatingString.length
+	const tempLength = tempString.length
+	if (previousLength == tempLength)
+	{
+		return;
+	}
+	const beforeString = tempString.slice(previousLength, tempLength).replace(" ", "%20");
+	previousTranslatingString = tempString;
 	let translatedString: string = "";
 	try
 	{
-		await fetch(translateApiUrl + "?text=" + encodeURIStrictly(beforeString) + "&source=" + encodeURIStrictly(language) + "&target=" + encodeURIStrictly(translateLanguage))
-		.then((response: Response) => 
-		{
-			return response.text( );
-		})
-		.then((text: string) =>
-		{
-			translatedString = text;
-		});
+		await fetch(synthApiUrl + "?text=" + beforeString)
 	}
 	catch (error)
 	{
-		console.log("翻訳リクエストに失敗しました。詳細：" + error.toString( ));
+		console.log("音声合成に失敗しました。詳細：" + error.toString( ));
 	}
 	previousTranslatedString = translatedString;
-	return translatedString;
+	return;
 };
 
 // 描画
-// renderer＝0：両方描画，renderer＝1：元言語描画，renderer＝2：翻訳描画
+// renderer＝0：両方描画，renderer＝1：元言語描画
 const render = (string: string, isSystemMessage: boolean, renderer: number) =>
 {
 	if (isSystemMessage)
@@ -265,25 +249,13 @@ const render = (string: string, isSystemMessage: boolean, renderer: number) =>
 		renderSubtitle(string);
 		return;
 	}
-	if (renderer == 2)
-	{
-		renderTranslation(string);
-		return;
-	}
 	renderSubtitle(string);
-	renderTranslation(string);
 };
 
 const renderSubtitle = (string: string) =>
 {
 	subtitle.textContent = "";
 	subtitle.insertAdjacentHTML("afterbegin", string);
-};
-
-const renderTranslation = (string: string) =>
-{
-	translation.textContent = "";
-	translation.insertAdjacentHTML("afterbegin", string);
 };
 
 const hideSubtitle = (previousTranscript: string) =>

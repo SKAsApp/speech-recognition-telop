@@ -6,25 +6,20 @@
 		<title>音声認識テロップ - SKA’s Web</title>
 		<link rel="shortcut icon" type="image/vnd.microsoft.icon" href="../favicon.ico"  />
 		<link rel="stylesheet" type="text/css" href="./recognition-video-style.css" />
-		<script type="text/javascript" src="./translation-script.js"></script>
+		<script type="text/javascript" src="./synth-script.js"></script>
 	</head>
 	<body>
 		<div id="all">
 			<div class="subtitle-box">
-				<div class="translation-box">
-					<p id="subtitle">
-						ここに元言語，
-					</p>
-				</div>
-				<div class="translation-box">
-					<p id="translation">
-						ここに翻訳先言語を表示します。
-					</p>
-				</div>
+				<p id="subtitle">
+					言語を選択してから認識開始ボタンを押してください<br />
+					このようにテロップを表示します<br />
+				</p>
 			</div>
 			<p>
 				言語： 
 				<select id="language" name="language">
+					<option value="">（ブラウザー言語）</option>
 					<option value="ja-JP" selected>日本語</option>
 					<option value="en-US">English</option>
 				</select>　　　　　
