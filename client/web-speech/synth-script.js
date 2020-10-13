@@ -21,7 +21,7 @@ let previousLog = [];
 let transcript = "";
 let confidence = 0.0;
 let resultCounter = 0;
-const synthApiUrl = "http://127.0.0.1:50080/talk";
+const synthApiUrl = "http://localhost:50080/talk";
 let previousTranslatingString = "";
 let previousTranslatedString = "";
 const { webkitSpeechRecognition, webkitSpeechRecognitionEvent, webkitSpeechRecognitionResultList } = window;
@@ -162,7 +162,9 @@ const synth = async (tempString) => {
     previousTranslatingString = tempString;
     let translatedString = "";
     try {
-        await fetch(synthApiUrl + "?text=" + beforeString);
+        await fetch(synthApiUrl + "?text=" + beforeString, {
+            mode: "cors"
+        });
     }
     catch (error) {
         console.log("音声合成に失敗しました。詳細：" + error.toString());

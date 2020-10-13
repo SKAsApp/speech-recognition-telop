@@ -23,7 +23,7 @@ let previousLog: Array<object> = [ ];
 let transcript: string = "";
 let confidence: number = 0.0;
 let resultCounter: number = 0;
-const synthApiUrl: string = "http://127.0.0.1:50080/talk";
+const synthApiUrl: string = "http://localhost:50080/talk";
 let previousTranslatingString: string = "";
 let previousTranslatedString: string = "";
 
@@ -225,7 +225,9 @@ const synth = async (tempString: string) =>
 	let translatedString: string = "";
 	try
 	{
-		await fetch(synthApiUrl + "?text=" + beforeString)
+		await fetch(synthApiUrl + "?text=" + beforeString, {
+			mode: "cors"
+		});
 	}
 	catch (error)
 	{
