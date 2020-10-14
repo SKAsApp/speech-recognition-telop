@@ -144,7 +144,7 @@ const setEventHandler = () => {
 const manageResultCounter = (isFinal) => {
     resultCounter += 1;
     // 1/nのn
-    if (!isFinal && resultCounter == 2) {
+    if (!isFinal && resultCounter == 5) {
         resultCounter = 0;
     }
     return resultCounter == 0;

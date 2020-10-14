@@ -201,7 +201,7 @@ const manageResultCounter = (isFinal: boolean) =>
 {
 	resultCounter += 1;
 	// 1/nのn
-	if (!isFinal && resultCounter == 2)
+	if (!isFinal && resultCounter == 5)
 	{
 		resultCounter = 0;
 	}
