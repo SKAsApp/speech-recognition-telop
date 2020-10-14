@@ -52,8 +52,10 @@ div.translation-box
 	position: relative;
 	margin-left: auto;
 	margin-right: auto;
+	margin-top: 8px;
+	margin-bottom: 8px;
 	width: 1190px;
-	height: 58px;
+	height: 42px;
 	line-height: 1.6;
 	background-color: #00ff00;
 	overflow: hidden;
@@ -81,6 +83,7 @@ p#subtitle, p#translation
 
 div.translation-box p#subtitle, div.translation-box p#translation
 {
+	bottom: -28px;
 	font-size: 26px;
 }
 
