@@ -128,7 +128,7 @@ const setEventHandler = () => {
         render(response, false, 1);
         const synthFlag = manageResultCounter(event.results[event.results.length - 1].isFinal);
         if (synthFlag) {
-            await synth(response);
+            await synth(response, event.results[event.results.length - 1].isFinal);
         }
         // 認識確定してたら
         if (event.results[event.results.length - 1].isFinal) {
@@ -149,7 +149,7 @@ const manageResultCounter = (isFinal) => {
     }
     return resultCounter == 0;
 };
-const synth = async (tempString) => {
+const synth = async (tempString, isFinal) => {
     if (tempString == previousTranslatingString) {
         return;
     }
@@ -159,7 +159,12 @@ const synth = async (tempString) => {
         return;
     }
     const beforeString = tempString.slice(previousLength, tempLength).replace(" ", "%20");
-    previousTranslatingString = tempString;
+    if (isFinal) {
+        previousTranslatingString = "";
+    }
+    else {
+        previousTranslatingString = tempString;
+    }
     let translatedString = "";
     try {
         await fetch(synthApiUrl + "?text=" + beforeString, {
@@ -225,12 +230,6 @@ const simplyRecord = (rtranscript, rconfidence) => {
 // 言語選択変わったら
 const changeLanguage = () => {
     language = languageSelector.value;
-    if (language == "ja-JP") {
-        translateLanguage = "en-US";
-    }
-    if (language == "en-US") {
-        translateLanguage = "ja-JP";
-    }
     if (recognition != null) {
         recognition.lang = language;
     }
