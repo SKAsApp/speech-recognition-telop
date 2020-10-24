@@ -53,7 +53,9 @@ else if (!((agent.indexOf("Chrome") != -1) && (agent.indexOf("Edge") == -1) && (
 {
 	window.alert("ご利用のブラウザーは音声認識に部分的にしか対応していません。\r\n制限なく利用するためには Google Chrome をお使いください。");
 }
+
 window.onunload = ( ) => { };
+
 // HTMLが読み込まれたら，音声認識インスタンスを生成し，出力先の要素を取得する
 document.addEventListener("DOMContentLoaded", ( ) => 
 {
@@ -182,7 +184,7 @@ const setEventHandler = ( ) =>
 		const synthFlag: boolean = manageResultCounter(event.results[event.results.length - 1].isFinal);
 		if (synthFlag)
 		{
-			await synth(response);
+			await synth(response, event.results[event.results.length - 1].isFinal);
 		}
 		// 認識確定してたら
 		if (event.results[event.results.length - 1].isFinal)
@@ -208,7 +210,7 @@ const manageResultCounter = (isFinal: boolean) =>
 	return resultCounter == 0;
 };
 
-const synth = async (tempString: string) =>
+const synth = async (tempString: string, isFinal: boolean) =>
 {
 	if (tempString == previousTranslatingString)
 	{
@@ -221,7 +223,14 @@ const synth = async (tempString: string) =>
 		return;
 	}
 	const beforeString = tempString.slice(previousLength, tempLength).replace(" ", "%20");
-	previousTranslatingString = tempString;
+	if (isFinal)
+	{
+		previousTranslatingString = "";
+	}
+	else
+	{
+		previousTranslatingString = tempString;
+	}
 	let translatedString: string = "";
 	try
 	{
@@ -305,14 +314,6 @@ const simplyRecord = (rtranscript: string, rconfidence: number) =>
 const changeLanguage = ( ) =>
 {
 	language = languageSelector.value;
-	if (language == "ja-JP")
-	{
-		translateLanguage = "en-US";
-	}
-	if (language == "en-US")
-	{
-		translateLanguage = "ja-JP";
-	}
 	if (recognition != null)
 	{
 		recognition.lang = language;
