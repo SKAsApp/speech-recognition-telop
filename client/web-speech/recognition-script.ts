@@ -83,7 +83,7 @@ const speechRecognition = ( ) =>
 	setEventHandler( );
 	speaking = false;
 	recognition.start( );
-}
+};
 
 // 初期化処理
 const initialize= ( ) =>
@@ -94,7 +94,7 @@ const initialize= ( ) =>
 	recognition.continuous = true;
 	recognition.interimResults = true;
 	recognition.maxAlternatives = 1;
-}
+};
 
 const setEventHandler = ( ) =>
 {
@@ -164,7 +164,7 @@ const setEventHandler = ( ) =>
 	{
 		// 結果取得
 		transcript = event.results[event.results.length - 1][0].transcript;
-		if (0 < event.results.length - 1 && !event.results[event.results.length - 2].isFinal)
+		if (0 < event.results.length - 1 && !isFinal(event.results[event.results.length - 2]))
 		{
 			transcript = event.results[event.results.length - 2][0].transcript + event.results[event.results.length - 1][0].transcript;
 		}
@@ -178,17 +178,23 @@ const setEventHandler = ( ) =>
 		// 描画
 		render(response, false);
 		// 認識確定してたら
-		if (event.results[event.results.length - 1].isFinal)
+		if (isFinal(event.results[event.results.length - 1]))
 		{
 			console.log((event.results.length - 1).toString( ) + "：確定。");
 			speaking = false;
 			simplyRecord(transcript, confidence);
-			setTimeout(hideSubtitle, 10000, transcript);
+			setTimeout(hideSubtitle, 10000, transcript, true);
 			return;
 		}
+		setTimeout(hideSubtitle, 10000, transcript, false);
 		speaking = true;
 	};
-}
+};
+
+const isFinal = (recognitionResult: SpeechRecognitionResult) =>
+{
+	return recognitionResult.isFinal && 0.40 <= recognitionResult[0].confidence;
+};
 
 // 描画
 const render = (string: string, isSystemMessage: boolean) =>
@@ -199,22 +205,28 @@ const render = (string: string, isSystemMessage: boolean) =>
 		return;
 	}
 	renderSubtitle(string);
-}
+};
 
 const renderSubtitle = (string: string) =>
 {
 	subtitle.textContent = "";
 	subtitle.insertAdjacentHTML("afterbegin", string);
-}
+};
 
-const hideSubtitle = (previousTranscript: string) =>
+const hideSubtitle = (previousTranscript: string, isFinal: boolean) =>
 {
-	if (previousTranscript == transcript)
+	if (isFinal && previousTranscript == transcript)
 	{
 		render("", false);
 		console.log("非表示。");
+		return;
 	}
-}
+	if (!isFinal && previousTranscript == transcript)
+	{
+		restart( );
+		return;
+	}
+};
 
 // 簡易保存機能（のちほどサーバーサイドに移行し，高度な機能もつける予定）
 const simplyRecord = (rtranscript: string, rconfidence: number) =>
@@ -246,7 +258,7 @@ const simplyRecord = (rtranscript: string, rconfidence: number) =>
 		confidence: rconfidence
 	};
 	previousLog.push(log);
-}
+};
 
 // 言語選択変わったら
 const changeLanguage = ( ) =>
@@ -256,7 +268,7 @@ const changeLanguage = ( ) =>
 	{
 		recognition.lang = language;
 	}
-}
+};
 
 // 開始ボタン押したら
 const recognitionStartClick = ( ) =>
@@ -270,7 +282,7 @@ const recognitionStartClick = ( ) =>
 	buttonStart.disabled = true;
 	buttonStop.disabled = false;
 	recognitionStart( );
-}
+};
 
 // 終了ボタン押したら
 const recognitionStopClick = ( ) =>
@@ -279,7 +291,7 @@ const recognitionStopClick = ( ) =>
 	buttonStop.disabled = true;
 	buttonStart.disabled = false;
 	recognitionStop( );
-}
+};
 
 // 保存ボタン押したら
 const getJson = ( ) =>
@@ -296,29 +308,29 @@ const getJson = ( ) =>
 	link.href = url;
 	link.download = String(startTime.getFullYear( )) + "-" + ("00" + String(Number(startTime.getMonth( ) + 1))).slice(-2) + "-" + ("00" + String(startTime.getDate( ))).slice(-2) + " 音声認識テロップ" + ".json";
 	link.click( );
-}
+};
 
 // 信頼度表示変更
 const setConfidenceMode = (mode: boolean) =>
 {
 	confidenceMode = mode;
-}
+};
 
 // 開始・終了関係
 const recognitionStart = ( ) =>
 {
 	speaking = false;
 	recognition.start( );
-}
+};
 
 const recognitionStop = ( ) =>
 {
 	recognition.stop( );
-}
+};
 
 const restart = ( ) =>
 {
 	console.log("再起動。");
 	recognitionStop( );
 	recognitionStart( );
-}
+};

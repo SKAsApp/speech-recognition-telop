@@ -173,7 +173,7 @@ const setEventHandler = ( ) =>
 	{
 		// 結果取得
 		transcript = event.results[event.results.length - 1][0].transcript;
-		if (0 < event.results.length - 1 && !event.results[event.results.length - 2].isFinal)
+		if (0 < event.results.length - 1 && !isFinal(event.results[event.results.length - 2]))
 		{
 			transcript = event.results[event.results.length - 2][0].transcript + event.results[event.results.length - 1][0].transcript;
 		}
@@ -181,22 +181,28 @@ const setEventHandler = ( ) =>
 		confidence = event.results[event.results.length - 1][0].confidence;
 		// 描画→合成
 		render(response, false, 1);
-		const synthFlag: boolean = manageResultCounter(event.results[event.results.length - 1].isFinal);
+		const synthFlag: boolean = manageResultCounter(isFinal(event.results[event.results.length - 1]));
 		if (synthFlag)
 		{
 			await synth(response, event.results[event.results.length - 1].isFinal);
 		}
 		// 認識確定してたら
-		if (event.results[event.results.length - 1].isFinal)
+		if (isFinal(event.results[event.results.length - 1]))
 		{
 			console.log((event.results.length - 1).toString( ) + "：確定。");
 			speaking = false;
 			simplyRecord(transcript, confidence);
-			setTimeout(hideSubtitle, 10000, transcript);
+			setTimeout(hideSubtitle, 10000, transcript, true);
 			return;
 		}
+		setTimeout(hideSubtitle, 10000, transcript, false);
 		speaking = true;
 	};
+};
+
+const isFinal = (recognitionResult: SpeechRecognitionResult) =>
+{
+	return recognitionResult.isFinal && 0.40 <= recognitionResult[0].confidence;
 };
 
 const manageResultCounter = (isFinal: boolean) =>
@@ -269,12 +275,18 @@ const renderSubtitle = (string: string) =>
 	subtitle.insertAdjacentHTML("afterbegin", string);
 };
 
-const hideSubtitle = (previousTranscript: string) =>
+const hideSubtitle = (previousTranscript: string, isFinal: boolean) =>
 {
-	if (previousTranscript == transcript)
+	if (isFinal && previousTranscript == transcript)
 	{
 		render("", false, 0);
 		console.log("非表示。");
+		return;
+	}
+	if (!isFinal && previousTranscript == transcript)
+	{
+		restart( );
+		return;
 	}
 };
 

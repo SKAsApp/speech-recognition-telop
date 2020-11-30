@@ -113,7 +113,7 @@ const setEventHandler = () => {
     recognition.onresult = (event) => {
         // 結果取得
         transcript = event.results[event.results.length - 1][0].transcript;
-        if (0 < event.results.length - 1 && !event.results[event.results.length - 2].isFinal) {
+        if (0 < event.results.length - 1 && !isFinal(event.results[event.results.length - 2])) {
             transcript = event.results[event.results.length - 2][0].transcript + event.results[event.results.length - 1][0].transcript;
         }
         let response = transcript;
@@ -125,15 +125,19 @@ const setEventHandler = () => {
         // 描画
         render(response, false);
         // 認識確定してたら
-        if (event.results[event.results.length - 1].isFinal) {
+        if (isFinal(event.results[event.results.length - 1])) {
             console.log((event.results.length - 1).toString() + "：確定。");
             speaking = false;
             simplyRecord(transcript, confidence);
-            setTimeout(hideSubtitle, 10000, transcript);
+            setTimeout(hideSubtitle, 10000, transcript, true);
             return;
         }
+        setTimeout(hideSubtitle, 10000, transcript, false);
         speaking = true;
     };
+};
+const isFinal = (recognitionResult) => {
+    return recognitionResult.isFinal && 0.40 <= recognitionResult[0].confidence;
 };
 // 描画
 const render = (string, isSystemMessage) => {
@@ -147,10 +151,15 @@ const renderSubtitle = (string) => {
     subtitle.textContent = "";
     subtitle.insertAdjacentHTML("afterbegin", string);
 };
-const hideSubtitle = (previousTranscript) => {
-    if (previousTranscript == transcript) {
+const hideSubtitle = (previousTranscript, isFinal) => {
+    if (isFinal && previousTranscript == transcript) {
         render("", false);
         console.log("非表示。");
+        return;
+    }
+    if (!isFinal && previousTranscript == transcript) {
+        restart();
+        return;
     }
 };
 // 簡易保存機能（のちほどサーバーサイドに移行し，高度な機能もつける予定）
