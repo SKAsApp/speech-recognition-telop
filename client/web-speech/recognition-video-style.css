@@ -1,18 +1,14 @@
-*
+body
 {
+	background-color: #282828;
+	color: #ffffff;
+	text-align: center;
 	font-style: normal;
 	font-variant: normal;
-	font-family: "Helvetica Neue", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "YuGothic", sans-serif;
+	font-family: "Helvetica Neue", "ヒラギノ角ゴ ProN", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "游ゴシック", "Yu Gothic", "YuGothic", sans-serif;
 	font-weight: 500;
 	font-feature-settings: "pkna" 1;
 	line-height: 1.8;
-}
-
-body
-{
-	background-color: #373737;
-	color: #ffffff;
-	text-align: center;
 }
 
 div#all
@@ -25,32 +21,38 @@ div#all
 
 button, select
 {
-	background-color: #dddddd;
-	color: #000000;
+	background-color: #666666;
+	color: #ffffff;
 	border-radius: 6pt;
-	border: 2pt solid;
-	border-color: #303030;
+	border: 1pt solid;
+	border-color: #262626;
 	vertical-align: middle;
+	min-width: 64pt;
+	min-height: 18pt;
+	font-feature-settings: "pkna" 1;
 }
 
 button
 {
+	text-align: center;
 	min-height: 24pt;
 }
 
 button#button-start
 {
 	background-color: #90ffff;
+	color: #000000;
 }
 
 button#button-stop
 {
 	background-color: #ffa0ff;
+	color: #000000;
 }
 
 button:disabled, button#button-start:disabled, button#button-stop:disabled
 {
-	background-color: #888888;
+	background-color: #535353;
 	color: #373737;
 }
 
@@ -61,7 +63,7 @@ div.subtitle-box, div.subtitle-box-w, div.translation-box, div.translation-box-w
 	margin-right: auto;
 	width: 1190px;
 	height: 116px;
-	line-height: 1.6;
+	line-height: 43px;
 	background-color: #00ff00;
 	overflow: hidden;
 }
@@ -92,7 +94,7 @@ p#subtitle, p#translation
 	text-align: justify;
 	text-justify: inter-character;
 	font-weight: 700;
-	line-height: 1.6;
+	line-height: 43px;
 	font-size: 32px;
 	color: #ffffff;
 	text-shadow: #000000 3px 0px 0px, #000000 2.83487px 0.981584px 0px, #000000 2.35766px 1.85511px 0px, #000000 1.62091px 2.52441px 0px, #000000 0.705713px 2.91581px 0px, #000000 -0.287171px 2.98622px 0px, #000000 -1.24844px 2.72789px 0px, #000000 -2.07227px 2.16926px 0px, #000000 -2.66798px 1.37182px 0px, #000000 -2.96998px 0.42336px 0px, #000000 -2.94502px -0.571704px 0px, #000000 -2.59586px -1.50383px 0px, #000000 -1.96093px -2.27041px 0px, #000000 -1.11013px -2.78704px 0px, #000000 -0.137119px -2.99686px 0px, #000000 0.850987px -2.87677px 0px, #000000 1.74541px -2.43999px 0px, #000000 2.44769px -1.73459px 0px, #000000 2.88051px -0.838247px 0px;
