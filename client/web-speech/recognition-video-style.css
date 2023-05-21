@@ -56,7 +56,7 @@ button:disabled, button#button-start:disabled, button#button-stop:disabled
 	color: #373737;
 }
 
-div.subtitle-box, div.subtitle-box-w, div.translation-box, div.translation-box-w
+div.subtitle-box, div.subtitle-box-w, div.translation-box, div.translation-box-w, div.chat-box, div.chat-box-w
 {
 	position: relative;
 	margin-left: auto;
@@ -69,6 +69,13 @@ div.subtitle-box, div.subtitle-box-w, div.translation-box, div.translation-box-w
 	overflow: hidden;
 }
 
+div.chat-box, div.chat-box-w
+{
+	height: 600px;
+	line-height: 1.3;
+	overflow: auto;
+}
+
 div.translation-box, div.translation-box-w
 {
 	margin-top: 8px;
@@ -76,12 +83,12 @@ div.translation-box, div.translation-box-w
 	height: 42px;
 }
 
-div.subtitle-box-w, div.translation-box-w
+div.subtitle-box-w, div.translation-box-w, div.chat-box-w
 {
 	background-color: #eeeeee;
 }
 
-p#subtitle, p#translation
+p#subtitle, p#translation, p#chat
 {
 	position: absolute;
 	bottom: -20px;
@@ -99,6 +106,15 @@ p#subtitle, p#translation
 	font-size: 32px;
 	color: #ffffff;
 	text-shadow: #000000 3px 0px 0px, #000000 2.83487px 0.981584px 0px, #000000 2.35766px 1.85511px 0px, #000000 1.62091px 2.52441px 0px, #000000 0.705713px 2.91581px 0px, #000000 -0.287171px 2.98622px 0px, #000000 -1.24844px 2.72789px 0px, #000000 -2.07227px 2.16926px 0px, #000000 -2.66798px 1.37182px 0px, #000000 -2.96998px 0.42336px 0px, #000000 -2.94502px -0.571704px 0px, #000000 -2.59586px -1.50383px 0px, #000000 -1.96093px -2.27041px 0px, #000000 -1.11013px -2.78704px 0px, #000000 -0.137119px -2.99686px 0px, #000000 0.850987px -2.87677px 0px, #000000 1.74541px -2.43999px 0px, #000000 2.44769px -1.73459px 0px, #000000 2.88051px -0.838247px 0px;
+}
+
+p#chat
+{
+	font-size: 24px;
+	line-height: 1.3;
+	top: 0px;
+	bottom: auto;
+	overflow: scroll;
 }
 
 div.translation-box p#subtitle, div.translation-box p#translation, div.translation-box-w p#subtitle, div.translation-box-w p#translation
@@ -143,4 +159,9 @@ span.confidence
 	color: #90ffff;
 	font-weight: 700;
 	font-size: 16px;
+}
+
+.left
+{
+	text-align: left;
 }

@@ -88,6 +88,11 @@ p.aa
 	line-height: 1.0;
 }
 
+.left
+{
+	text-align: left;
+}
+
 .right
 {
 	text-align: right;
