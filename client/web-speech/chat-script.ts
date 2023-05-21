@@ -27,6 +27,7 @@ let resultCounter: number = 0;
 let proxyUrl: string = ""
 let chatApiKey: string = "";
 let chatToken: string = ""
+const synthApiUrl: string = "http://localhost:50080/talk";
 let previousChattingString: string = "";
 let previousChattedString: string = "";
 
@@ -258,13 +259,16 @@ const setEventHandler = ( ) =>
 			speaking = false;
 			// Chat
 			let chatResponse = await callChat(response);
+			synth(chatResponse);
 			render(chatResponse, false, 2);
 			// 簡易保存＆終了処理
 			simplyRecord(transcript, confidence, chatResponse);
-			setTimeout(hideSubtitle, 10000, transcript, true);
+			// 非表示にはしない
+			// setTimeout(hideSubtitle, 10000, transcript, true);
 			return;
 		}
-		setTimeout(hideSubtitle, 10000, transcript, false);
+		// 非表示にはしない
+		// setTimeout(hideSubtitle, 10000, transcript, false);
 		speaking = true;
 	};
 };
@@ -308,14 +312,29 @@ const callChat = async (beforeString: string) =>
 	}
 	catch (error)
 	{
-		console.log("翻訳リクエストに失敗しました。詳細：" + error.toString( ));
+		console.log("Chatリクエストに失敗しました。詳細：" + error.toString( ));
 	}
 	previousChattedString = chattedString;
 	return chattedString;
 };
 
+const synth = async (beforeString: string) =>
+{
+	try
+	{
+		await fetch(synthApiUrl + "?text=" + beforeString, 
+		{
+			mode: "cors"
+		});
+	}
+	catch (error)
+	{
+		console.log("音声合成に失敗しました。詳細：" + error.toString( ));
+	}
+}
+
 // 描画
-// renderer＝0：両方描画，renderer＝1：元言語描画，renderer＝2：翻訳描画
+// renderer＝0：両方描画，renderer＝1：元言語描画，renderer＝2：チャット描画
 const render = (string: string, isSystemMessage: boolean, renderer: number) =>
 {
 	if (isSystemMessage)
