@@ -318,6 +318,6 @@ function downloadRecognitionLog() {
     window.URL.revokeObjectURL(objectUrl);
 }
 // 外部の設定画面などから信頼度表示を切り替えるために公開する
-export function setConfidenceMode(mode) {
+function setConfidenceMode(mode) {
     confidenceMode = mode;
 }
