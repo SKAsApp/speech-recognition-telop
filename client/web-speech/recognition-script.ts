@@ -248,7 +248,7 @@ const transferHidariCameraOn = async (transcript: string, sessionId: string) =>
 			},
 			body: JSON.stringify(
 				{
-					"requestId": crypto.randomUUID( ), 
+					"requestId": generateUuid( ), 
 					"source": "speech-recognition-telop", 
 					"eventType": "speech-recognition", 
 					"text": transcript, 
@@ -262,7 +262,35 @@ const transferHidariCameraOn = async (transcript: string, sessionId: string) =>
 	{
 		
 	}
-}
+};
+
+const generateUuid = ( ) =>
+{
+	if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function")
+	{
+		return crypto.randomUUID( );
+	}
+	if (typeof crypto === "undefined" || typeof crypto.getRandomValues !== "function")
+	{
+		throw new Error("このブラウザーでは安全なUUIDを生成できません。");
+	}
+	const randomBytes = new Uint8Array(16);
+	crypto.getRandomValues(randomBytes);
+	// UUIDv4を表すビットに設定する
+	randomBytes[6] = (randomBytes[6] & 0x0f) | 0x40;
+	// UUIDのバリアントを表すビットに設定する
+	randomBytes[8] = (randomBytes[8] & 0x3f) | 0x80;
+	const hexadecimalBytes = Array.from(randomBytes, (byteValue) => byteValue.toString(16).padStart(2, "0")
+	);
+	return
+	[
+		hexadecimalBytes.slice(0, 4).join(""),
+		hexadecimalBytes.slice(4, 6).join(""),
+		hexadecimalBytes.slice(6, 8).join(""),
+		hexadecimalBytes.slice(8, 10).join(""),
+		hexadecimalBytes.slice(10, 16).join("")
+	].join("-");
+};
 
 // 簡易保存機能（のちほどサーバーサイドに移行し，高度な機能もつける予定）
 const simplyRecord = (rtranscript: string, rconfidence: number) =>
