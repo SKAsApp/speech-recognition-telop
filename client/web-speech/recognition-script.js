@@ -174,7 +174,8 @@ const transferHidariCameraOn = async (transcript, sessionId) => {
             method: "POST",
             mode: "cors",
             headers: {
-                "Content-Type": "application/json; charset=UTF-8"
+                "Content-Type": "application/json; charset=UTF-8",
+                "Authorization": "Bearer nxjfp3yfj883"
             },
             body: JSON.stringify({
                 "requestId": generateUuid(),
