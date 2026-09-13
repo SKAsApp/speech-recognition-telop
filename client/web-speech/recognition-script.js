@@ -273,4 +273,3 @@ const restart = () => {
     recognitionStop();
     recognitionStart();
 };
-export {};
