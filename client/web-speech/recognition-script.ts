@@ -19,6 +19,8 @@ let rid: number = -1;
 let previousLog: Array<object> = [ ];
 let transcript: string = "";
 let confidence: number = 0.0;
+const hidariCameraApiUrl: string = "http://localhost:15082/api/v1/speech-recognition";
+let sessionId = "";
 
 export interface SpeechRecognitionErrorEvent extends Event
 {
@@ -182,6 +184,7 @@ const setEventHandler = ( ) =>
 		{
 			console.log((event.results.length - 1).toString( ) + "：確定。");
 			speaking = false;
+			transferHidariCameraOn(transcript, sessionId);
 			simplyRecord(transcript, confidence);
 			setTimeout(hideSubtitle, 10000, transcript, true);
 			return;
@@ -227,6 +230,39 @@ const hideSubtitle = (previousTranscript: string, isFinal: boolean) =>
 		return;
 	}
 };
+
+// 左カメラONへの転送
+const transferHidariCameraOn = async (transcript: string, sessionId: string) =>
+{
+	const jstNow = new Date(Date.now( ) + 9 * 60 * 60 * 1000);
+	const jstTime = jstNow.toISOString( ).slice(0, 19) + "+09:00";
+	try
+	{
+		await fetch(hidariCameraApiUrl, 
+		{
+			method: "POST",
+			mode: "cors",
+			headers: 
+			{
+				"Content-Type": "application/json; charset=UTF-8"
+			},
+			body: JSON.stringify(
+				{
+					"requestId": crypto.randomUUID( ), 
+					"source": "speech-recognition-telop", 
+					"eventType": "speech-recognition", 
+					"text": transcript, 
+					"receivedAt": jstTime, 
+					"sessionId": sessionId
+				}
+			)
+		});
+	}
+	catch (error)
+	{
+		
+	}
+}
 
 // 簡易保存機能（のちほどサーバーサイドに移行し，高度な機能もつける予定）
 const simplyRecord = (rtranscript: string, rconfidence: number) =>
@@ -281,6 +317,7 @@ const recognitionStartClick = ( ) =>
 	buttonStopPushed = false;
 	buttonStart.disabled = true;
 	buttonStop.disabled = false;
+	sessionId = crypto.randomUUID( );
 	recognitionStart( );
 };
 

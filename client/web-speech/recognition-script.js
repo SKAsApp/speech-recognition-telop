@@ -18,6 +18,8 @@ let rid = -1;
 let previousLog = [];
 let transcript = "";
 let confidence = 0.0;
+const hidariCameraApiUrl = "http://localhost:15082/api/v1/speech-recognition";
+let sessionId = "";
 const { webkitSpeechRecognition, webkitSpeechRecognitionEvent, webkitSpeechRecognitionResultList } = window;
 window.SpeechRecognition = window.SpeechRecognition || webkitSpeechRecognition;
 window.SpeechRecognitionEvent = window.SpeechRecognitionEvent || webkitSpeechRecognitionEvent;
@@ -128,6 +130,7 @@ const setEventHandler = () => {
         if (isFinal(event.results[event.results.length - 1])) {
             console.log((event.results.length - 1).toString() + "：確定。");
             speaking = false;
+            transferHidariCameraOn(transcript, sessionId);
             simplyRecord(transcript, confidence);
             setTimeout(hideSubtitle, 10000, transcript, true);
             return;
@@ -160,6 +163,30 @@ const hideSubtitle = (previousTranscript, isFinal) => {
     if (!isFinal && previousTranscript == transcript) {
         restart();
         return;
+    }
+};
+// 左カメラONへの転送
+const transferHidariCameraOn = async (transcript, sessionId) => {
+    const jstNow = new Date(Date.now() + 9 * 60 * 60 * 1000);
+    const jstTime = jstNow.toISOString().slice(0, 19) + "+09:00";
+    try {
+        await fetch(hidariCameraApiUrl, {
+            method: "POST",
+            mode: "cors",
+            headers: {
+                "Content-Type": "application/json; charset=UTF-8"
+            },
+            body: JSON.stringify({
+                "requestId": crypto.randomUUID(),
+                "source": "speech-recognition-telop",
+                "eventType": "speech-recognition",
+                "text": transcript,
+                "receivedAt": jstTime,
+                "sessionId": sessionId
+            })
+        });
+    }
+    catch (error) {
     }
 };
 // 簡易保存機能（のちほどサーバーサイドに移行し，高度な機能もつける予定）
@@ -205,6 +232,7 @@ const recognitionStartClick = () => {
     buttonStopPushed = false;
     buttonStart.disabled = true;
     buttonStop.disabled = false;
+    sessionId = crypto.randomUUID();
     recognitionStart();
 };
 // 終了ボタン押したら
@@ -245,3 +273,4 @@ const restart = () => {
     recognitionStop();
     recognitionStart();
 };
+export {};
