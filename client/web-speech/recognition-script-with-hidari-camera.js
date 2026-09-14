@@ -170,6 +170,7 @@ const transferHidariCameraOn = async (transcript, sessionId) => {
     const jstNow = new Date(Date.now() + 9 * 60 * 60 * 1000);
     const jstTime = jstNow.toISOString().slice(0, 19) + "+09:00";
     try {
+        // 【注意】localhostの通信で、おまけ程度の認証でしかないため、トークンをハードコードしている。
         await fetch(hidariCameraApiUrl, {
             method: "POST",
             mode: "cors",
@@ -204,8 +205,7 @@ const generateUuid = () => {
     // UUIDのバリアントを表すビットに設定する
     randomBytes[8] = (randomBytes[8] & 0x3f) | 0x80;
     const hexadecimalBytes = Array.from(randomBytes, (byteValue) => byteValue.toString(16).padStart(2, "0"));
-    return;
-    [
+    return [
         hexadecimalBytes.slice(0, 4).join(""),
         hexadecimalBytes.slice(4, 6).join(""),
         hexadecimalBytes.slice(6, 8).join(""),
@@ -256,7 +256,7 @@ const recognitionStartClick = () => {
     buttonStopPushed = false;
     buttonStart.disabled = true;
     buttonStop.disabled = false;
-    sessionId = crypto.randomUUID();
+    sessionId = generateUuid();
     recognitionStart();
 };
 // 終了ボタン押したら
