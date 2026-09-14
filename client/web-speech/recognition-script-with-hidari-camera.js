@@ -1,17 +1,14 @@
 /*!
  * Copyright 2020 SKA
  */
-// ※ 音声認識翻訳（α）用。αのため，recognition-script.tsとほぼ同じコードですが，ファイルを分けています。（β）の頃にはいい感じにソース管理されてると思います。
 // 初期処理
 let agent = window.navigator.userAgent;
 let subtitle;
-let translation;
 let languageSelector;
 let buttonStart;
 let buttonStop;
 let buttonSave;
 let language = "ja-JP";
-let translateLanguage = "en-US";
 let speaking = false;
 let buttonStopPushed = false;
 let recognition;
@@ -21,10 +18,8 @@ let rid = -1;
 let previousLog = [];
 let transcript = "";
 let confidence = 0.0;
-let resultCounter = 0;
-let translateApiUrl = "";
-let previousTranslatingString = "";
-let previousTranslatedString = "";
+const hidariCameraApiUrl = "http://localhost:15082/api/v1/speech-recognition";
+let sessionId = "";
 const { webkitSpeechRecognition, webkitSpeechRecognitionEvent, webkitSpeechRecognitionResultList } = window;
 window.SpeechRecognition = window.SpeechRecognition || webkitSpeechRecognition;
 window.SpeechRecognitionEvent = window.SpeechRecognitionEvent || webkitSpeechRecognitionEvent;
@@ -41,7 +36,6 @@ document.addEventListener("DOMContentLoaded", () => {
     initialize();
     setEventHandler();
     subtitle = document.getElementById("subtitle");
-    translation = document.getElementById("translation");
     buttonStart = document.getElementById("button-start");
     buttonStop = document.getElementById("button-stop");
     buttonSave = document.getElementById("button-save");
@@ -59,17 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
     languageSelector.addEventListener("change", (event) => {
         changeLanguage();
     }, false);
-    setTranslateApiUrl();
 }, false);
-const setTranslateApiUrl = () => {
-    const tempUrl = prompt("翻訳URLを入力してください。");
-    if (tempUrl == null || !tempUrl.startsWith("https://script.google.com/macros/") || !tempUrl.endsWith("/exec")) {
-        alert("入力が間違っています。\r\nもう1度入力するにはページを再読み込みしてください。");
-        buttonStart.disabled = true;
-        return;
-    }
-    translateApiUrl = tempUrl;
-};
 const speechRecognition = () => {
     initialize();
     setEventHandler();
@@ -128,7 +112,7 @@ const setEventHandler = () => {
         console.log("start：サービスが言語認識開始");
     };
     // 認識したら
-    recognition.onresult = async (event) => {
+    recognition.onresult = (event) => {
         // 結果取得
         transcript = event.results[event.results.length - 1][0].transcript;
         if (0 < event.results.length - 1 && !isFinal(event.results[event.results.length - 2])) {
@@ -136,17 +120,17 @@ const setEventHandler = () => {
         }
         let response = transcript;
         confidence = event.results[event.results.length - 1][0].confidence;
-        // 翻訳→描画
-        render(response, false, 1);
-        const translateFlag = manageResultCounter(isFinal(event.results[event.results.length - 1]));
-        if (translateFlag) {
-            response = await translate(response);
-            render(response, false, 2);
+        if (confidenceMode) {
+            const confidenceString = confidence.toString().slice(0, 5);
+            response = transcript + '<span class="confidence"> （' + confidenceString + '）</span>';
         }
+        // 描画
+        render(response, false);
         // 認識確定してたら
         if (isFinal(event.results[event.results.length - 1])) {
             console.log((event.results.length - 1).toString() + "：確定。");
             speaking = false;
+            transferHidariCameraOn(transcript, sessionId);
             simplyRecord(transcript, confidence);
             setTimeout(hideSubtitle, 10000, transcript, true);
             return;
@@ -158,63 +142,21 @@ const setEventHandler = () => {
 const isFinal = (recognitionResult) => {
     return recognitionResult.isFinal && 0.40 <= recognitionResult[0].confidence;
 };
-const manageResultCounter = (isFinal) => {
-    resultCounter += 1;
-    if (isFinal || resultCounter == 8) {
-        resultCounter = 0;
-    }
-    return resultCounter == 0;
-};
-const translate = async (beforeString) => {
-    if (beforeString == previousTranslatingString) {
-        return previousTranslatedString;
-    }
-    previousTranslatingString = beforeString;
-    let translatedString = "";
-    try {
-        await fetch(translateApiUrl + "?text=" + encodeURIStrictly(beforeString) + "&source=" + encodeURIStrictly(language) + "&target=" + encodeURIStrictly(translateLanguage))
-            .then((response) => {
-            return response.text();
-        })
-            .then((text) => {
-            translatedString = text;
-        });
-    }
-    catch (error) {
-        console.log("翻訳リクエストに失敗しました。詳細：" + error.toString());
-    }
-    previousTranslatedString = translatedString;
-    return translatedString;
-};
 // 描画
-// renderer＝0：両方描画，renderer＝1：元言語描画，renderer＝2：翻訳描画
-const render = (string, isSystemMessage, renderer) => {
+const render = (string, isSystemMessage) => {
     if (isSystemMessage) {
         renderSubtitle('<span class="system">' + string + '</span>');
         return;
     }
-    if (renderer == 1) {
-        renderSubtitle(string);
-        return;
-    }
-    if (renderer == 2) {
-        renderTranslation(string);
-        return;
-    }
     renderSubtitle(string);
-    renderTranslation(string);
 };
 const renderSubtitle = (string) => {
     subtitle.textContent = "";
     subtitle.insertAdjacentHTML("afterbegin", string);
 };
-const renderTranslation = (string) => {
-    translation.textContent = "";
-    translation.insertAdjacentHTML("afterbegin", string);
-};
 const hideSubtitle = (previousTranscript, isFinal) => {
     if (isFinal && previousTranscript == transcript) {
-        render("", false, 0);
+        render("", false);
         console.log("非表示。");
         return;
     }
@@ -222,6 +164,54 @@ const hideSubtitle = (previousTranscript, isFinal) => {
         restart();
         return;
     }
+};
+// 左カメラONへの転送
+const transferHidariCameraOn = async (transcript, sessionId) => {
+    const jstNow = new Date(Date.now() + 9 * 60 * 60 * 1000);
+    const jstTime = jstNow.toISOString().slice(0, 19) + "+09:00";
+    try {
+        // 【注意】localhostの通信で、おまけ程度の認証でしかないため、トークンをハードコードしている。
+        await fetch(hidariCameraApiUrl, {
+            method: "POST",
+            mode: "cors",
+            headers: {
+                "Content-Type": "application/json; charset=UTF-8",
+                "Authorization": "Bearer nxjfp3yfj883"
+            },
+            body: JSON.stringify({
+                "requestId": generateUuid(),
+                "source": "speech-recognition-telop",
+                "eventType": "speech-recognition",
+                "text": transcript,
+                "receivedAt": jstTime,
+                "sessionId": sessionId
+            })
+        });
+    }
+    catch (error) {
+    }
+};
+const generateUuid = () => {
+    if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+        return crypto.randomUUID();
+    }
+    if (typeof crypto === "undefined" || typeof crypto.getRandomValues !== "function") {
+        throw new Error("このブラウザーでは安全なUUIDを生成できません。");
+    }
+    const randomBytes = new Uint8Array(16);
+    crypto.getRandomValues(randomBytes);
+    // UUIDv4を表すビットに設定する
+    randomBytes[6] = (randomBytes[6] & 0x0f) | 0x40;
+    // UUIDのバリアントを表すビットに設定する
+    randomBytes[8] = (randomBytes[8] & 0x3f) | 0x80;
+    const hexadecimalBytes = Array.from(randomBytes, (byteValue) => byteValue.toString(16).padStart(2, "0"));
+    return [
+        hexadecimalBytes.slice(0, 4).join(""),
+        hexadecimalBytes.slice(4, 6).join(""),
+        hexadecimalBytes.slice(6, 8).join(""),
+        hexadecimalBytes.slice(8, 10).join(""),
+        hexadecimalBytes.slice(10, 16).join("")
+    ].join("-");
 };
 // 簡易保存機能（のちほどサーバーサイドに移行し，高度な機能もつける予定）
 const simplyRecord = (rtranscript, rconfidence) => {
@@ -253,12 +243,6 @@ const simplyRecord = (rtranscript, rconfidence) => {
 // 言語選択変わったら
 const changeLanguage = () => {
     language = languageSelector.value;
-    if (language == "ja-JP") {
-        translateLanguage = "en-US";
-    }
-    if (language == "en-US") {
-        translateLanguage = "ja-JP";
-    }
     if (recognition != null) {
         recognition.lang = language;
     }
@@ -272,6 +256,7 @@ const recognitionStartClick = () => {
     buttonStopPushed = false;
     buttonStart.disabled = true;
     buttonStop.disabled = false;
+    sessionId = generateUuid();
     recognitionStart();
 };
 // 終了ボタン押したら
@@ -311,9 +296,4 @@ const restart = () => {
     console.log("再起動。");
     recognitionStop();
     recognitionStart();
-};
-const encodeURIStrictly = (beforeUri) => {
-    return encodeURIComponent(beforeUri).replace(/[!'()*]/g, (c) => {
-        return '%' + c.charCodeAt(0).toString(16);
-    });
 };

@@ -7,6 +7,7 @@
 // 初期処理
 let agent: string = window.navigator.userAgent;
 let subtitle: HTMLParagraphElement;
+let translation: HTMLParagraphElement;
 let languageSelector: HTMLInputElement;
 let buttonStart: HTMLButtonElement;
 let buttonStop: HTMLButtonElement;
@@ -60,6 +61,7 @@ document.addEventListener("DOMContentLoaded", ( ) =>
 	initialize( );
 	setEventHandler( );
 	subtitle = <HTMLParagraphElement> document.getElementById("subtitle");
+	translation = <HTMLParagraphElement> document.getElementById("translation");
 	buttonStart = <HTMLButtonElement> document.getElementById("button-start");
 	buttonStop = <HTMLButtonElement> document.getElementById("button-stop");
 	buttonSave = <HTMLButtonElement> document.getElementById("button-save");
@@ -125,9 +127,9 @@ const setEventHandler = ( ) =>
 	};
 
 	// 接続が切れたら
-	recognition.onend = (event: SpeechRecognitionErrorEvent) => 
+	recognition.onend = (event: Event) => 
 	{
-		console.log("接続が切れました。" + "　speaking：" + String(speaking) + "　stopButtonPushed：" + String(buttonStopPushed));
+		console.log("end：ブラウザーが音声捕捉終了\r\n接続が切れました。" + "　speaking：" + String(speaking) + "　stopButtonPushed：" + String(buttonStopPushed));
 		if (!speaking && !buttonStopPushed)
 		{
 			restart( );
@@ -142,16 +144,41 @@ const setEventHandler = ( ) =>
 		recognitionStop( );
 	};
 
-	// 音が途切れたら
-	// recognition.onsoundend = (event: SpeechRecognitionErrorEvent) => 
-	// {
-	// 	
-	// };
-
 	// 認識できなかったら
 	recognition.onnomatch = (event: SpeechRecognitionEvent) => 
 	{
 		console.log("認識できませんでした。");
+	};
+
+	// その他のイベントハンドラー
+	recognition.onaudiostart = (event: Event) => 
+	{
+		console.log("audio start：ブラウザーが音声捕捉");
+	};
+
+	recognition.onsoundstart = (event: Event) => 
+	{
+		console.log("sound start：なにか音が鳴った");
+	};
+
+	recognition.onsoundend = (event: Event) => 
+	{
+		console.log("sound end：音が止まった");
+	};
+
+	recognition.onspeechstart = (event: Event) => 
+	{
+		console.log("speech start：サービスが認識開始");
+	};
+
+	recognition.onspeechend = (event: Event) => 
+	{
+		console.log("speech end：サービスが認識終了");
+	};
+
+	recognition.onstart = (event: Event) => 
+	{
+		console.log("start：サービスが言語認識開始");
 	};
 
 	// 認識したら
@@ -159,30 +186,37 @@ const setEventHandler = ( ) =>
 	{
 		// 結果取得
 		transcript = event.results[event.results.length - 1][0].transcript;
-		if (0 < event.results.length - 1 && !event.results[event.results.length - 2].isFinal)
+		if (0 < event.results.length - 1 && !isFinal(event.results[event.results.length - 2]))
 		{
 			transcript = event.results[event.results.length - 2][0].transcript + event.results[event.results.length - 1][0].transcript;
 		}
 		let response: string = transcript;
 		confidence = event.results[event.results.length - 1][0].confidence;
 		// 翻訳→描画
-		const translateFlag: boolean = manageResultCounter(event.results[event.results.length - 1].isFinal);
+		render(response, false, 1);
+		const translateFlag: boolean = manageResultCounter(isFinal(event.results[event.results.length - 1]));
 		if (translateFlag)
 		{
 			response = await translate(response);
-			render(response, false);
+			render(response, false, 2);
 		}
 		// 認識確定してたら
-		if (event.results[event.results.length - 1].isFinal)
+		if (isFinal(event.results[event.results.length - 1]))
 		{
 			console.log((event.results.length - 1).toString( ) + "：確定。");
 			speaking = false;
 			simplyRecord(transcript, confidence);
-			setTimeout(hideSubtitle, 15000, transcript);
+			setTimeout(hideSubtitle, 10000, transcript, true);
 			return;
 		}
+		setTimeout(hideSubtitle, 10000, transcript, false);
 		speaking = true;
 	};
+};
+
+const isFinal = (recognitionResult: SpeechRecognitionResult) =>
+{
+	return recognitionResult.isFinal && 0.40 <= recognitionResult[0].confidence;
 };
 
 const manageResultCounter = (isFinal: boolean) =>
@@ -224,14 +258,26 @@ const translate = async (beforeString: string) =>
 };
 
 // 描画
-const render = (string: string, isSystemMessage: boolean) =>
+// renderer＝0：両方描画，renderer＝1：元言語描画，renderer＝2：翻訳描画
+const render = (string: string, isSystemMessage: boolean, renderer: number) =>
 {
 	if (isSystemMessage)
 	{
 		renderSubtitle('<span class="system">' + string + '</span>');
 		return;
 	}
+	if (renderer == 1)
+	{
+		renderSubtitle(string);
+		return;
+	}
+	if (renderer == 2)
+	{
+		renderTranslation(string);
+		return;
+	}
 	renderSubtitle(string);
+	renderTranslation(string);
 };
 
 const renderSubtitle = (string: string) =>
@@ -240,12 +286,24 @@ const renderSubtitle = (string: string) =>
 	subtitle.insertAdjacentHTML("afterbegin", string);
 };
 
-const hideSubtitle = (previousTranscript: string) =>
+const renderTranslation = (string: string) =>
 {
-	if (previousTranscript == transcript)
+	translation.textContent = "";
+	translation.insertAdjacentHTML("afterbegin", string);
+};
+
+const hideSubtitle = (previousTranscript: string, isFinal: boolean) =>
+{
+	if (isFinal && previousTranscript == transcript)
 	{
-		render("", false);
+		render("", false, 0);
 		console.log("非表示。");
+		return;
+	}
+	if (!isFinal && previousTranscript == transcript)
+	{
+		restart( );
+		return;
 	}
 };
 
@@ -335,7 +393,7 @@ const getJson = ( ) =>
 	const url: string = window.URL.createObjectURL(blob);
 	const link: HTMLAnchorElement = document.createElement("a");
 	link.href = url;
-	link.download = "音声認識テロップ " + String(startTime.getFullYear( )) + "-" + ("00" + String(Number(startTime.getMonth( ) + 1))).slice(-2) + "-" + ("00" + String(startTime.getDate( ))).slice(-2) + ".json";
+	link.download = String(startTime.getFullYear( )) + "-" + ("00" + String(Number(startTime.getMonth( ) + 1))).slice(-2) + "-" + ("00" + String(startTime.getDate( ))).slice(-2) + " 音声認識テロップ" + ".json";
 	link.click( );
 };
 

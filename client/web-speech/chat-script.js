@@ -1,11 +1,11 @@
 /*!
- * Copyright 2020 SKA
+ * Copyright 2023 SKA
  */
-// ※ 音声認識翻訳（α）用。αのため，recognition-script.tsとほぼ同じコードですが，ファイルを分けています。（β）の頃にはいい感じにソース管理されてると思います。
+// ※ ChatGPT用。
 // 初期処理
 let agent = window.navigator.userAgent;
 let subtitle;
-let translation;
+let chat;
 let languageSelector;
 let buttonStart;
 let buttonStop;
@@ -22,9 +22,12 @@ let previousLog = [];
 let transcript = "";
 let confidence = 0.0;
 let resultCounter = 0;
-let translateApiUrl = "";
-let previousTranslatingString = "";
-let previousTranslatedString = "";
+let proxyUrl = "";
+let chatApiKey = "";
+let chatToken = "";
+const synthApiUrl = "http://localhost:50080/talk";
+let previousChattingString = "";
+let previousChattedString = "";
 const { webkitSpeechRecognition, webkitSpeechRecognitionEvent, webkitSpeechRecognitionResultList } = window;
 window.SpeechRecognition = window.SpeechRecognition || webkitSpeechRecognition;
 window.SpeechRecognitionEvent = window.SpeechRecognitionEvent || webkitSpeechRecognitionEvent;
@@ -41,7 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
     initialize();
     setEventHandler();
     subtitle = document.getElementById("subtitle");
-    translation = document.getElementById("translation");
+    chat = document.getElementById("chat");
     buttonStart = document.getElementById("button-start");
     buttonStop = document.getElementById("button-stop");
     buttonSave = document.getElementById("button-save");
@@ -59,16 +62,49 @@ document.addEventListener("DOMContentLoaded", () => {
     languageSelector.addEventListener("change", (event) => {
         changeLanguage();
     }, false);
-    setTranslateApiUrl();
+    setProxyUrl();
+    setChatApiKey();
+    setChatToken();
 }, false);
-const setTranslateApiUrl = () => {
-    const tempUrl = prompt("翻訳URLを入力してください。");
-    if (tempUrl == null || !tempUrl.startsWith("https://script.google.com/macros/") || !tempUrl.endsWith("/exec")) {
+const setProxyUrl = () => {
+    const tempProxyUrl = prompt("中継サーバーのURL（/tokenや/chatの前まで、最後の「/」不要）を入力してください。");
+    if (tempProxyUrl == null || !tempProxyUrl.startsWith("https://")) {
         alert("入力が間違っています。\r\nもう1度入力するにはページを再読み込みしてください。");
         buttonStart.disabled = true;
         return;
     }
-    translateApiUrl = tempUrl;
+    proxyUrl = tempProxyUrl;
+};
+const setChatApiKey = () => {
+    const tempChatApiKey = prompt("ChatGPT APIキーを入力してください。");
+    if (tempChatApiKey == null) {
+        alert("入力が間違っています。\r\nもう1度入力するにはページを再読み込みしてください。");
+        buttonStart.disabled = true;
+        return;
+    }
+    chatApiKey = tempChatApiKey;
+};
+const setChatToken = async () => {
+    try {
+        await fetch(proxyUrl + "/token", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json; charset=\"utf-8\""
+            },
+            body: JSON.stringify({
+                key: chatApiKey
+            }, null, "\t")
+        })
+            .then((response) => {
+            return response.json();
+        })
+            .then((json) => {
+            chatToken = json.token;
+        });
+    }
+    catch (error) {
+        console.log("翻訳リクエストに失敗しました。詳細：" + error.toString());
+    }
 };
 const speechRecognition = () => {
     initialize();
@@ -98,7 +134,7 @@ const setEventHandler = () => {
             return;
         }
         if (speaking && !buttonStopPushed) {
-            simplyRecord(transcript, confidence);
+            simplyRecord(transcript, confidence, "");
             restart();
             return;
         }
@@ -136,58 +172,70 @@ const setEventHandler = () => {
         }
         let response = transcript;
         confidence = event.results[event.results.length - 1][0].confidence;
-        // 翻訳→描画
         render(response, false, 1);
-        const translateFlag = manageResultCounter(isFinal(event.results[event.results.length - 1]));
-        if (translateFlag) {
-            response = await translate(response);
-            render(response, false, 2);
-        }
         // 認識確定してたら
         if (isFinal(event.results[event.results.length - 1])) {
             console.log((event.results.length - 1).toString() + "：確定。");
             speaking = false;
-            simplyRecord(transcript, confidence);
-            setTimeout(hideSubtitle, 10000, transcript, true);
+            // Chat
+            let chatResponse = await callChat(response);
+            synth(chatResponse);
+            render(chatResponse, false, 2);
+            // 簡易保存＆終了処理
+            simplyRecord(transcript, confidence, chatResponse);
+            // 非表示にはしない
+            // setTimeout(hideSubtitle, 10000, transcript, true);
             return;
         }
-        setTimeout(hideSubtitle, 10000, transcript, false);
+        // 非表示にはしない
+        // setTimeout(hideSubtitle, 10000, transcript, false);
         speaking = true;
     };
 };
 const isFinal = (recognitionResult) => {
     return recognitionResult.isFinal && 0.40 <= recognitionResult[0].confidence;
 };
-const manageResultCounter = (isFinal) => {
-    resultCounter += 1;
-    if (isFinal || resultCounter == 8) {
-        resultCounter = 0;
+const callChat = async (beforeString) => {
+    if (beforeString == previousChattingString) {
+        return previousChattedString;
     }
-    return resultCounter == 0;
-};
-const translate = async (beforeString) => {
-    if (beforeString == previousTranslatingString) {
-        return previousTranslatedString;
-    }
-    previousTranslatingString = beforeString;
-    let translatedString = "";
+    previousChattingString = beforeString;
+    let chattedString = "";
     try {
-        await fetch(translateApiUrl + "?text=" + encodeURIStrictly(beforeString) + "&source=" + encodeURIStrictly(language) + "&target=" + encodeURIStrictly(translateLanguage))
-            .then((response) => {
-            return response.text();
+        await fetch(proxyUrl + "/chat/" + chatToken, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json; charset=\"utf-8\""
+            },
+            body: JSON.stringify({
+                transcript: beforeString
+            }, null, "\t")
         })
-            .then((text) => {
-            translatedString = text;
+            .then((response) => {
+            return response.json();
+        })
+            .then((json) => {
+            chattedString = json.message;
         });
     }
     catch (error) {
-        console.log("翻訳リクエストに失敗しました。詳細：" + error.toString());
+        console.log("Chatリクエストに失敗しました。詳細：" + error.toString());
     }
-    previousTranslatedString = translatedString;
-    return translatedString;
+    previousChattedString = chattedString;
+    return chattedString;
+};
+const synth = async (beforeString) => {
+    try {
+        await fetch(synthApiUrl + "?text=" + beforeString, {
+            mode: "cors"
+        });
+    }
+    catch (error) {
+        console.log("音声合成に失敗しました。詳細：" + error.toString());
+    }
 };
 // 描画
-// renderer＝0：両方描画，renderer＝1：元言語描画，renderer＝2：翻訳描画
+// renderer＝0：両方描画，renderer＝1：元言語描画，renderer＝2：チャット描画
 const render = (string, isSystemMessage, renderer) => {
     if (isSystemMessage) {
         renderSubtitle('<span class="system">' + string + '</span>');
@@ -198,19 +246,19 @@ const render = (string, isSystemMessage, renderer) => {
         return;
     }
     if (renderer == 2) {
-        renderTranslation(string);
+        renderChat(string);
         return;
     }
     renderSubtitle(string);
-    renderTranslation(string);
+    renderChat(string);
 };
 const renderSubtitle = (string) => {
     subtitle.textContent = "";
     subtitle.insertAdjacentHTML("afterbegin", string);
 };
-const renderTranslation = (string) => {
-    translation.textContent = "";
-    translation.insertAdjacentHTML("afterbegin", string);
+const renderChat = (string) => {
+    chat.textContent = "";
+    chat.insertAdjacentHTML("afterbegin", string);
 };
 const hideSubtitle = (previousTranscript, isFinal) => {
     if (isFinal && previousTranscript == transcript) {
@@ -224,7 +272,7 @@ const hideSubtitle = (previousTranscript, isFinal) => {
     }
 };
 // 簡易保存機能（のちほどサーバーサイドに移行し，高度な機能もつける予定）
-const simplyRecord = (rtranscript, rconfidence) => {
+const simplyRecord = (rtranscript, rconfidence, rchat) => {
     if (startTime == null) {
         return;
     }
@@ -246,7 +294,8 @@ const simplyRecord = (rtranscript, rconfidence) => {
             millisecond: timeDiff.getUTCMilliseconds()
         },
         transcript: rtranscript,
-        confidence: rconfidence
+        confidence: rconfidence,
+        chat: rchat
     };
     previousLog.push(log);
 };

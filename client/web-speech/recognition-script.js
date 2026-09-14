@@ -74,7 +74,7 @@ const setEventHandler = () => {
     };
     // 接続が切れたら
     recognition.onend = (event) => {
-        console.log("接続が切れました。" + "　speaking：" + String(speaking) + "　stopButtonPushed：" + String(buttonStopPushed));
+        console.log("end：ブラウザーが音声捕捉終了\r\n接続が切れました。" + "　speaking：" + String(speaking) + "　stopButtonPushed：" + String(buttonStopPushed));
         if (!speaking && !buttonStopPushed) {
             restart();
             return;
@@ -86,20 +86,34 @@ const setEventHandler = () => {
         }
         recognitionStop();
     };
-    // 音が途切れたら
-    // recognition.onsoundend = (event: SpeechRecognitionErrorEvent) => 
-    // {
-    // 	
-    // };
     // 認識できなかったら
     recognition.onnomatch = (event) => {
         console.log("認識できませんでした。");
+    };
+    // その他のイベントハンドラー
+    recognition.onaudiostart = (event) => {
+        console.log("audio start：ブラウザーが音声捕捉");
+    };
+    recognition.onsoundstart = (event) => {
+        console.log("sound start：なにか音が鳴った");
+    };
+    recognition.onsoundend = (event) => {
+        console.log("sound end：音が止まった");
+    };
+    recognition.onspeechstart = (event) => {
+        console.log("speech start：サービスが認識開始");
+    };
+    recognition.onspeechend = (event) => {
+        console.log("speech end：サービスが認識終了");
+    };
+    recognition.onstart = (event) => {
+        console.log("start：サービスが言語認識開始");
     };
     // 認識したら
     recognition.onresult = (event) => {
         // 結果取得
         transcript = event.results[event.results.length - 1][0].transcript;
-        if (0 < event.results.length - 1 && !event.results[event.results.length - 2].isFinal) {
+        if (0 < event.results.length - 1 && !isFinal(event.results[event.results.length - 2])) {
             transcript = event.results[event.results.length - 2][0].transcript + event.results[event.results.length - 1][0].transcript;
         }
         let response = transcript;
@@ -111,15 +125,19 @@ const setEventHandler = () => {
         // 描画
         render(response, false);
         // 認識確定してたら
-        if (event.results[event.results.length - 1].isFinal) {
+        if (isFinal(event.results[event.results.length - 1])) {
             console.log((event.results.length - 1).toString() + "：確定。");
             speaking = false;
             simplyRecord(transcript, confidence);
-            setTimeout(hideSubtitle, 15000, transcript);
+            setTimeout(hideSubtitle, 10000, transcript, true);
             return;
         }
+        setTimeout(hideSubtitle, 10000, transcript, false);
         speaking = true;
     };
+};
+const isFinal = (recognitionResult) => {
+    return recognitionResult.isFinal && 0.40 <= recognitionResult[0].confidence;
 };
 // 描画
 const render = (string, isSystemMessage) => {
@@ -133,10 +151,15 @@ const renderSubtitle = (string) => {
     subtitle.textContent = "";
     subtitle.insertAdjacentHTML("afterbegin", string);
 };
-const hideSubtitle = (previousTranscript) => {
-    if (previousTranscript == transcript) {
+const hideSubtitle = (previousTranscript, isFinal) => {
+    if (isFinal && previousTranscript == transcript) {
         render("", false);
         console.log("非表示。");
+        return;
+    }
+    if (!isFinal && previousTranscript == transcript) {
+        restart();
+        return;
     }
 };
 // 簡易保存機能（のちほどサーバーサイドに移行し，高度な機能もつける予定）
@@ -202,7 +225,7 @@ const getJson = () => {
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = "音声認識テロップ " + String(startTime.getFullYear()) + "-" + ("00" + String(Number(startTime.getMonth() + 1))).slice(-2) + "-" + ("00" + String(startTime.getDate())).slice(-2) + ".json";
+    link.download = String(startTime.getFullYear()) + "-" + ("00" + String(Number(startTime.getMonth() + 1))).slice(-2) + "-" + ("00" + String(startTime.getDate())).slice(-2) + " 音声認識テロップ" + ".json";
     link.click();
 };
 // 信頼度表示変更

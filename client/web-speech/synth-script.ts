@@ -2,6 +2,8 @@
  * Copyright 2020 SKA
  */
 
+ // ※ 音声認識合成（α）用。αのため，recognition-script.tsとほぼ同じコードですが，ファイルを分けています。（β）の頃にはいい感じにソース管理されてると思います。
+
 // 初期処理
 let agent: string = window.navigator.userAgent;
 let subtitle: HTMLParagraphElement;
@@ -10,6 +12,7 @@ let buttonStart: HTMLButtonElement;
 let buttonStop: HTMLButtonElement;
 let buttonSave: HTMLButtonElement;
 let language: string = "ja-JP";
+let translateLanguage: string = "en-US";
 let speaking: boolean = false;
 let buttonStopPushed: boolean = false;
 let recognition: SpeechRecognition;
@@ -19,6 +22,10 @@ let rid: number = -1;
 let previousLog: Array<object> = [ ];
 let transcript: string = "";
 let confidence: number = 0.0;
+let resultCounter: number = 0;
+const synthApiUrl: string = "http://localhost:50080/talk";
+let previousTranslatingString: string = "";
+let previousTranslatedString: string = "";
 
 export interface SpeechRecognitionErrorEvent extends Event
 {
@@ -46,7 +53,9 @@ else if (!((agent.indexOf("Chrome") != -1) && (agent.indexOf("Edge") == -1) && (
 {
 	window.alert("ご利用のブラウザーは音声認識に部分的にしか対応していません。\r\n制限なく利用するためには Google Chrome をお使いください。");
 }
+
 window.onunload = ( ) => { };
+
 // HTMLが読み込まれたら，音声認識インスタンスを生成し，出力先の要素を取得する
 document.addEventListener("DOMContentLoaded", ( ) => 
 {
@@ -160,7 +169,7 @@ const setEventHandler = ( ) =>
 	};
 
 	// 認識したら
-	recognition.onresult = (event: SpeechRecognitionEvent) => 
+	recognition.onresult = async (event: SpeechRecognitionEvent) => 
 	{
 		// 結果取得
 		transcript = event.results[event.results.length - 1][0].transcript;
@@ -170,13 +179,13 @@ const setEventHandler = ( ) =>
 		}
 		let response: string = transcript;
 		confidence = event.results[event.results.length - 1][0].confidence;
-		if (confidenceMode)
+		// 描画→合成
+		render(response, false, 1);
+		const synthFlag: boolean = manageResultCounter(isFinal(event.results[event.results.length - 1]));
+		if (synthFlag)
 		{
-			const confidenceString: string = confidence.toString( ).slice(0, 5);
-			response = transcript + '<span class="confidence"> （' + confidenceString + '）</span>';
+			await synth(response, event.results[event.results.length - 1].isFinal);
 		}
-		// 描画
-		render(response, false);
 		// 認識確定してたら
 		if (isFinal(event.results[event.results.length - 1]))
 		{
@@ -196,12 +205,65 @@ const isFinal = (recognitionResult: SpeechRecognitionResult) =>
 	return recognitionResult.isFinal && 0.40 <= recognitionResult[0].confidence;
 };
 
+const manageResultCounter = (isFinal: boolean) =>
+{
+	resultCounter += 1;
+	// 1/nのn
+	if (isFinal || resultCounter == 5)
+	{
+		resultCounter = 0;
+	}
+	return resultCounter == 0;
+};
+
+const synth = async (tempString: string, isFinal: boolean) =>
+{
+	if (tempString == previousTranslatingString)
+	{
+		return;
+	}
+	const previousLength = previousTranslatingString.length
+	const tempLength = tempString.length
+	if (previousLength == tempLength)
+	{
+		return;
+	}
+	const beforeString = tempString.slice(previousLength, tempLength).replace(" ", "%20");
+	if (isFinal)
+	{
+		previousTranslatingString = "";
+	}
+	else
+	{
+		previousTranslatingString = tempString;
+	}
+	let translatedString: string = "";
+	try
+	{
+		await fetch(synthApiUrl + "?text=" + beforeString, {
+			mode: "cors"
+		});
+	}
+	catch (error)
+	{
+		console.log("音声合成に失敗しました。詳細：" + error.toString( ));
+	}
+	previousTranslatedString = translatedString;
+	return;
+};
+
 // 描画
-const render = (string: string, isSystemMessage: boolean) =>
+// renderer＝0：両方描画，renderer＝1：元言語描画
+const render = (string: string, isSystemMessage: boolean, renderer: number) =>
 {
 	if (isSystemMessage)
 	{
 		renderSubtitle('<span class="system">' + string + '</span>');
+		return;
+	}
+	if (renderer == 1)
+	{
+		renderSubtitle(string);
 		return;
 	}
 	renderSubtitle(string);
@@ -217,7 +279,7 @@ const hideSubtitle = (previousTranscript: string, isFinal: boolean) =>
 {
 	if (isFinal && previousTranscript == transcript)
 	{
-		render("", false);
+		render("", false, 0);
 		console.log("非表示。");
 		return;
 	}
@@ -333,4 +395,12 @@ const restart = ( ) =>
 	console.log("再起動。");
 	recognitionStop( );
 	recognitionStart( );
+};
+
+const encodeURIStrictly = (beforeUri: string) => 
+{
+	return encodeURIComponent(beforeUri).replace(/[!'()*]/g, (c) => 
+	{
+		return '%' + c.charCodeAt(0).toString(16);
+	});
 };

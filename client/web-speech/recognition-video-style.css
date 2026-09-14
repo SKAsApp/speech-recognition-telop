@@ -1,51 +1,94 @@
-*
-{
-	font-style: normal;
-	font-variant: normal;
-	font-family: "游ゴシック", "YuGothic", "Yu Gothic", sans-serif;
-	font-weight: 500;
-}
-
 body
 {
-	background-color: #373737;
+	background-color: #282828;
 	color: #ffffff;
 	text-align: center;
+	font-style: normal;
+	font-variant: normal;
+	font-family: "Helvetica Neue", "ヒラギノ角ゴ ProN", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "游ゴシック", "Yu Gothic", "YuGothic", sans-serif;
+	font-weight: 500;
+	font-feature-settings: "pkna" 1;
+	line-height: 1.8;
 }
 
 div#all
 {
+	max-width: 1280px;
 	margin-left: auto;
 	margin-right: auto;
+	text-align: center;
 }
 
 button, select
 {
-	background-color: #dddddd;
-	color: #000000;
-	line-height: 1.8;
+	background-color: #666666;
+	color: #ffffff;
+	border-radius: 6pt;
+	border: 1pt solid;
+	border-color: #262626;
+	vertical-align: middle;
+	min-width: 64pt;
+	min-height: 18pt;
+	font-feature-settings: "pkna" 1;
 }
 
-button:disabled
+button
 {
-	background-color: #888888;
-	color: #373737;
-	line-height: 1.8;
+	text-align: center;
+	min-height: 24pt;
 }
 
-div.subtitle-box
+button#button-start
+{
+	background-color: #90ffff;
+	color: #000000;
+}
+
+button#button-stop
+{
+	background-color: #ffa0ff;
+	color: #000000;
+}
+
+button:disabled, button#button-start:disabled, button#button-stop:disabled
+{
+	background-color: #535353;
+	color: #373737;
+}
+
+div.subtitle-box, div.subtitle-box-w, div.translation-box, div.translation-box-w, div.chat-box, div.chat-box-w
 {
 	position: relative;
 	margin-left: auto;
 	margin-right: auto;
 	width: 1190px;
-	height: 116px;
-	/*height: 164px;*/
+	/* height＝line-height×2−bottom＠p#subtitle−1 */
+	height: 99px;
+	line-height: 40px;
 	background-color: #00ff00;
 	overflow: hidden;
 }
 
-p#subtitle
+div.chat-box, div.chat-box-w
+{
+	height: 600px;
+	line-height: 1.3;
+	overflow: auto;
+}
+
+div.translation-box, div.translation-box-w
+{
+	margin-top: 8px;
+	margin-bottom: 8px;
+	height: 42px;
+}
+
+div.subtitle-box-w, div.translation-box-w, div.chat-box-w
+{
+	background-color: #eeeeee;
+}
+
+p#subtitle, p#translation, p#chat
 {
 	position: absolute;
 	bottom: -20px;
@@ -53,15 +96,56 @@ p#subtitle
 	right: 0px;
 	margin-left: auto;
 	margin-right: auto;
-	text-align: center;
 	overflow: hidden;
 	text-overflow: "";
-	font-family: "游ゴシック", "YuGothic", "Yu Gothic", sans-serif;
+	padding: 4pt;
+	text-align: justify;
+	text-justify: inter-character;
 	font-weight: 700;
-	line-height: normal;
+	line-height: 40px;
 	font-size: 32px;
 	color: #ffffff;
 	text-shadow: #000000 3px 0px 0px, #000000 2.83487px 0.981584px 0px, #000000 2.35766px 1.85511px 0px, #000000 1.62091px 2.52441px 0px, #000000 0.705713px 2.91581px 0px, #000000 -0.287171px 2.98622px 0px, #000000 -1.24844px 2.72789px 0px, #000000 -2.07227px 2.16926px 0px, #000000 -2.66798px 1.37182px 0px, #000000 -2.96998px 0.42336px 0px, #000000 -2.94502px -0.571704px 0px, #000000 -2.59586px -1.50383px 0px, #000000 -1.96093px -2.27041px 0px, #000000 -1.11013px -2.78704px 0px, #000000 -0.137119px -2.99686px 0px, #000000 0.850987px -2.87677px 0px, #000000 1.74541px -2.43999px 0px, #000000 2.44769px -1.73459px 0px, #000000 2.88051px -0.838247px 0px;
+}
+
+p#chat
+{
+	font-size: 24px;
+	line-height: 1.3;
+	top: 0px;
+	bottom: auto;
+	overflow: scroll;
+}
+
+div.translation-box p#subtitle, div.translation-box p#translation, div.translation-box-w p#subtitle, div.translation-box-w p#translation
+{
+	bottom: -28px;
+	font-size: 26px;
+}
+
+div.horizontal-box
+{
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+}
+
+div.box-item
+{
+	margin-left: 24pt;
+	margin-left: 24pt;
+}
+
+/*select#language
+{
+	margin-right: 16pt;
+}*/
+
+button#button-save
+{
+	margin-left: 48pt;
+	margin-right: 48pt;
 }
 
 span.system
@@ -75,4 +159,9 @@ span.confidence
 	color: #90ffff;
 	font-weight: 700;
 	font-size: 16px;
+}
+
+.left
+{
+	text-align: left;
 }

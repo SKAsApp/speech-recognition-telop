@@ -6,11 +6,12 @@
 		<title>音声認識テロップ - SKA’s Web</title>
 		<link rel="shortcut icon" type="image/vnd.microsoft.icon" href="../favicon.ico"  />
 		<link rel="stylesheet" type="text/css" href="./recognition-video-style.css" />
-		<script type="text/javascript" src="./recognition-script.js"></script>
+		<script type="text/javascript" src="./chat-script.js"></script>
 	</head>
 	<body>
 		<div id="all">
-			<div class="subtitle-box">
+			<p class="left">【音声認識】</p>
+			<div class="subtitle-box-w">
 				<p id="subtitle">
 					言語を選択してから認識開始ボタンを押してください<br />
 					このようにテロップを表示します<br />
@@ -36,6 +37,14 @@
 				<div class="box-item">
 					<button id="button-start">▶ 認識開始</button>
 				</div>
+			</div>
+
+			<p class="left">【Chat応答】</p>
+			<div class="chat-box-w">
+				<p id="chat">
+					ChatGPTからの応答は<br />
+					このように表示します<br />
+				</p>
 			</div>
 		</div>
 	</body>

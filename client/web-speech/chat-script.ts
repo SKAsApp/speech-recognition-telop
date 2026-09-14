@@ -1,15 +1,19 @@
 /*!
- * Copyright 2020 SKA
+ * Copyright 2023 SKA
  */
+
+ // ※ ChatGPT用。
 
 // 初期処理
 let agent: string = window.navigator.userAgent;
 let subtitle: HTMLParagraphElement;
+let chat: HTMLParagraphElement;
 let languageSelector: HTMLInputElement;
 let buttonStart: HTMLButtonElement;
 let buttonStop: HTMLButtonElement;
 let buttonSave: HTMLButtonElement;
 let language: string = "ja-JP";
+let translateLanguage: string = "en-US";
 let speaking: boolean = false;
 let buttonStopPushed: boolean = false;
 let recognition: SpeechRecognition;
@@ -19,6 +23,13 @@ let rid: number = -1;
 let previousLog: Array<object> = [ ];
 let transcript: string = "";
 let confidence: number = 0.0;
+let resultCounter: number = 0;
+let proxyUrl: string = ""
+let chatApiKey: string = "";
+let chatToken: string = ""
+const synthApiUrl: string = "http://localhost:50080/talk";
+let previousChattingString: string = "";
+let previousChattedString: string = "";
 
 export interface SpeechRecognitionErrorEvent extends Event
 {
@@ -53,6 +64,7 @@ document.addEventListener("DOMContentLoaded", ( ) =>
 	initialize( );
 	setEventHandler( );
 	subtitle = <HTMLParagraphElement> document.getElementById("subtitle");
+	chat = <HTMLParagraphElement> document.getElementById("chat");
 	buttonStart = <HTMLButtonElement> document.getElementById("button-start");
 	buttonStop = <HTMLButtonElement> document.getElementById("button-stop");
 	buttonSave = <HTMLButtonElement> document.getElementById("button-save");
@@ -74,7 +86,76 @@ document.addEventListener("DOMContentLoaded", ( ) =>
 	{
 		changeLanguage( );
 	}, false);
+	setProxyUrl( );
+	setChatApiKey( );
+	setChatToken( );
 }, false);
+
+const setProxyUrl = ( ) =>
+{
+	const tempProxyUrl: string | null = prompt("中継サーバーのURL（/tokenや/chatの前まで、最後の「/」不要）を入力してください。");
+	if (tempProxyUrl == null || !tempProxyUrl.startsWith("https://"))
+	{
+		alert("入力が間違っています。\r\nもう1度入力するにはページを再読み込みしてください。");
+		buttonStart.disabled = true;
+		return;
+	}
+	proxyUrl = tempProxyUrl;
+};
+
+const setChatApiKey = ( ) =>
+{
+	const tempChatApiKey: string | null = prompt("ChatGPT APIキーを入力してください。");
+	if (tempChatApiKey == null)
+	{
+		alert("入力が間違っています。\r\nもう1度入力するにはページを再読み込みしてください。");
+		buttonStart.disabled = true;
+		return;
+	}
+	chatApiKey = tempChatApiKey;
+};
+
+type TokenResponse = 
+{
+	token: string
+};
+
+type ChatResponse = 
+{
+	message: string
+};
+
+const setChatToken = async ( ) =>
+{
+	try
+	{
+		await fetch(proxyUrl + "/token", 
+		{
+			method: "POST",
+			headers:
+			{
+				"Content-Type": "application/json; charset=\"utf-8\""
+			},
+			body: JSON.stringify(
+				{
+					key: chatApiKey
+				}, 
+				null, "\t")
+		})
+		.then((response: Response) => 
+		{
+			return response.json( ) as Promise<TokenResponse>;
+		})
+		.then((json: TokenResponse) =>
+		{
+			chatToken = json.token;
+		});
+	}
+	catch (error)
+	{
+		console.log("翻訳リクエストに失敗しました。詳細：" + error.toString( ));
+	}
+};
 
 
 const speechRecognition = ( ) =>
@@ -115,7 +196,7 @@ const setEventHandler = ( ) =>
 		}
 		if (speaking && !buttonStopPushed)
 		{
-			simplyRecord(transcript, confidence);
+			simplyRecord(transcript, confidence, "");
 			restart( );
 			return;
 		}
@@ -160,7 +241,7 @@ const setEventHandler = ( ) =>
 	};
 
 	// 認識したら
-	recognition.onresult = (event: SpeechRecognitionEvent) => 
+	recognition.onresult = async (event: SpeechRecognitionEvent) => 
 	{
 		// 結果取得
 		transcript = event.results[event.results.length - 1][0].transcript;
@@ -170,23 +251,24 @@ const setEventHandler = ( ) =>
 		}
 		let response: string = transcript;
 		confidence = event.results[event.results.length - 1][0].confidence;
-		if (confidenceMode)
-		{
-			const confidenceString: string = confidence.toString( ).slice(0, 5);
-			response = transcript + '<span class="confidence"> （' + confidenceString + '）</span>';
-		}
-		// 描画
-		render(response, false);
+		render(response, false, 1);
 		// 認識確定してたら
 		if (isFinal(event.results[event.results.length - 1]))
 		{
 			console.log((event.results.length - 1).toString( ) + "：確定。");
 			speaking = false;
-			simplyRecord(transcript, confidence);
-			setTimeout(hideSubtitle, 10000, transcript, true);
+			// Chat
+			let chatResponse = await callChat(response);
+			synth(chatResponse);
+			render(chatResponse, false, 2);
+			// 簡易保存＆終了処理
+			simplyRecord(transcript, confidence, chatResponse);
+			// 非表示にはしない
+			// setTimeout(hideSubtitle, 10000, transcript, true);
 			return;
 		}
-		setTimeout(hideSubtitle, 10000, transcript, false);
+		// 非表示にはしない
+		// setTimeout(hideSubtitle, 10000, transcript, false);
 		speaking = true;
 	};
 };
@@ -196,15 +278,82 @@ const isFinal = (recognitionResult: SpeechRecognitionResult) =>
 	return recognitionResult.isFinal && 0.40 <= recognitionResult[0].confidence;
 };
 
+const callChat = async (beforeString: string) =>
+{
+	if (beforeString == previousChattingString)
+	{
+		return previousChattedString;
+	}
+	previousChattingString = beforeString;
+	let chattedString: string = "";
+	try
+	{
+		await fetch(proxyUrl + "/chat/" + chatToken, 
+		{
+			method: "PUT",
+			headers:
+			{
+				"Content-Type": "application/json; charset=\"utf-8\""
+			},
+			body: JSON.stringify(
+				{
+					transcript: beforeString
+				}, 
+				null, "\t")
+		})
+		.then((response: Response) => 
+		{
+			return response.json( ) as Promise<ChatResponse>;
+		})
+		.then((json: ChatResponse) =>
+		{
+			chattedString = json.message;
+		});
+	}
+	catch (error)
+	{
+		console.log("Chatリクエストに失敗しました。詳細：" + error.toString( ));
+	}
+	previousChattedString = chattedString;
+	return chattedString;
+};
+
+const synth = async (beforeString: string) =>
+{
+	try
+	{
+		await fetch(synthApiUrl + "?text=" + beforeString, 
+		{
+			mode: "cors"
+		});
+	}
+	catch (error)
+	{
+		console.log("音声合成に失敗しました。詳細：" + error.toString( ));
+	}
+}
+
 // 描画
-const render = (string: string, isSystemMessage: boolean) =>
+// renderer＝0：両方描画，renderer＝1：元言語描画，renderer＝2：チャット描画
+const render = (string: string, isSystemMessage: boolean, renderer: number) =>
 {
 	if (isSystemMessage)
 	{
 		renderSubtitle('<span class="system">' + string + '</span>');
 		return;
 	}
+	if (renderer == 1)
+	{
+		renderSubtitle(string);
+		return;
+	}
+	if (renderer == 2)
+	{
+		renderChat(string);
+		return;
+	}
 	renderSubtitle(string);
+	renderChat(string);
 };
 
 const renderSubtitle = (string: string) =>
@@ -213,11 +362,17 @@ const renderSubtitle = (string: string) =>
 	subtitle.insertAdjacentHTML("afterbegin", string);
 };
 
+const renderChat = (string: string) =>
+{
+	chat.textContent = "";
+	chat.insertAdjacentHTML("afterbegin", string);
+};
+
 const hideSubtitle = (previousTranscript: string, isFinal: boolean) =>
 {
 	if (isFinal && previousTranscript == transcript)
 	{
-		render("", false);
+		render("", false, 0);
 		console.log("非表示。");
 		return;
 	}
@@ -229,7 +384,7 @@ const hideSubtitle = (previousTranscript: string, isFinal: boolean) =>
 };
 
 // 簡易保存機能（のちほどサーバーサイドに移行し，高度な機能もつける予定）
-const simplyRecord = (rtranscript: string, rconfidence: number) =>
+const simplyRecord = (rtranscript: string, rconfidence: number, rchat: string) =>
 {
 	if (startTime == null)
 	{
@@ -255,7 +410,8 @@ const simplyRecord = (rtranscript: string, rconfidence: number) =>
 			millisecond: timeDiff.getUTCMilliseconds( )
 		},
 		transcript: rtranscript,
-		confidence: rconfidence
+		confidence: rconfidence,
+		chat: rchat
 	};
 	previousLog.push(log);
 };
@@ -264,6 +420,14 @@ const simplyRecord = (rtranscript: string, rconfidence: number) =>
 const changeLanguage = ( ) =>
 {
 	language = languageSelector.value;
+	if (language == "ja-JP")
+	{
+		translateLanguage = "en-US";
+	}
+	if (language == "en-US")
+	{
+		translateLanguage = "ja-JP";
+	}
 	if (recognition != null)
 	{
 		recognition.lang = language;
@@ -333,4 +497,12 @@ const restart = ( ) =>
 	console.log("再起動。");
 	recognitionStop( );
 	recognitionStart( );
+};
+
+const encodeURIStrictly = (beforeUri: string) => 
+{
+	return encodeURIComponent(beforeUri).replace(/[!'()*]/g, (c) => 
+	{
+		return '%' + c.charCodeAt(0).toString(16);
+	});
 };
